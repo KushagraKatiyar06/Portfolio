@@ -5,7 +5,7 @@ export default function EnterPrompt({ onEnter }) {
 
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === 'Enter') onEnter()
+      if (e.key === 'ArrowUp') onEnter()
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
@@ -21,7 +21,7 @@ export default function EnterPrompt({ onEnter }) {
         bottom: 60,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 25,
+        zIndex: 27,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -39,7 +39,7 @@ export default function EnterPrompt({ onEnter }) {
         textShadow: '0 0 20px rgba(255,255,255,0.6)',
         animation: 'pulseText 2s ease-in-out infinite',
       }}>
-        press enter to continue
+        press ↑ for web view
       </span>
 
       {/* animated chevron */}

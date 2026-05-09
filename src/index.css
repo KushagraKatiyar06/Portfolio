@@ -9,3 +9,33 @@ body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   overflow: hidden;
 }
+
+/* ── Shared portfolio classes ─────────────────────── */
+.v1-icon { position:relative; display:inline-flex; cursor:pointer; transition:transform 0.3s; }
+.v1-icon:hover { transform: translateY(-4px) scale(1.15); }
+.v1-icon img { filter: drop-shadow(0 0 5px rgba(255,255,255,0.25)); transition:filter 0.3s; }
+.v1-icon:hover img { filter: drop-shadow(0 0 9px rgba(255,255,255,0.6)); }
+.v1-icon::after {
+  content: attr(data-tip);
+  position:absolute; bottom:-26px; left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,0.9); color:#fff;
+  padding:3px 8px; border-radius:4px; font-size:11px;
+  font-family:Imprima,sans-serif; white-space:nowrap;
+  pointer-events:none; z-index:300;
+  border:1px solid rgba(255,255,255,0.12);
+  opacity:0; transition:opacity 0.2s; letter-spacing:0.04em;
+}
+.v1-icon:hover::after { opacity:1; }
+
+.link-icon { display:inline-flex; cursor:pointer; transition:transform 0.3s; }
+.link-icon:hover { transform:scale(1.2); }
+.link-icon img { filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); transition:filter 0.3s; }
+.link-icon:hover img { filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); }
+
+.resume-btn { display:inline-flex; align-items:center; gap:0.5rem; text-decoration:none; transition:transform 0.3s; }
+.resume-btn:hover { transform:scale(1.08); }
+.resume-btn:hover span { text-shadow:0 0 8px #fff; }
+
+.v1-scroll::-webkit-scrollbar { width:4px; }
+.v1-scroll::-webkit-scrollbar-track { background:transparent; }
+.v1-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:4px; }
