@@ -1,17 +1,10 @@
 import { useGLTF } from '@react-three/drei'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
 export default function Car({ url, position, rotation, scale }) {
   const { scene } = useGLTF(url)
+  // Clone so two cars can share the same loaded scene without conflicts
   const cloned = useMemo(() => scene.clone(true), [scene])
-
-  useEffect(() => {
-    cloned.traverse(child => {
-      if (!child.isMesh) return
-      child.castShadow = true
-      child.receiveShadow = true
-    })
-  }, [cloned])
 
   return (
     <primitive
