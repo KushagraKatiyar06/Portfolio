@@ -7,10 +7,9 @@ export default function Car({ url, position, rotation, scale }) {
 
   useEffect(() => {
     cloned.traverse(child => {
-      if (child.isMesh) {
-        child.castShadow = true
-        child.receiveShadow = true
-      }
+      if (!child.isMesh) return
+      child.castShadow = true
+      child.receiveShadow = true
     })
   }, [cloned])
 

@@ -1,10 +1,9 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Environment, useGLTF } from '@react-three/drei'
-import { Suspense, useState, useCallback, useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, Environment, useGLTF, CameraShake } from '@react-three/drei'
+import { Suspense, useRef } from 'react'
 import Garage from './components/Garage'
 import Car from './components/Car'
-import UI from './components/UI'
-import SceneFitter from './components/SceneFitter'
+import BlobShadow from './components/BlobShadow'
 
 import garageUrl from '../models/garage_nfs_2015.glb?url'
 import rx7Url from '../models/rx7_fd.glb?url'
@@ -14,114 +13,58 @@ useGLTF.preload(garageUrl)
 useGLTF.preload(rx7Url)
 useGLTF.preload(carreraUrl)
 
-export const CARS = [
-  { id: 'rx7', name: 'Mazda RX-7 FD', url: rx7Url },
-  { id: 'carrera', name: 'Porsche Carrera GT', url: carreraUrl },
-]
+const DEG = Math.PI / 180
 
-// Known-good placements — SceneFitter will not override these
-const CAR_DEFAULTS = {
-  rx7:     { px: -0.28, py: -0.02, pz: -0.15, ry:   0, scale: 0.18 },
-  carrera: { px:  0.00, py: -0.24, pz:  0.01, ry: -48, scale: 0.13 },
+function CameraDebug({ controlsRef, domRef }) {
+  useFrame(({ camera }) => {
+    if (!domRef.current) return
+    const p = camera.position
+    const t = controlsRef.current?.target
+    domRef.current.innerHTML =
+      `<span style="color:#888">pos</span>  [${p.x.toFixed(4)}, ${p.y.toFixed(4)}, ${p.z.toFixed(4)}]<br/>` +
+      (t ? `<span style="color:#888">tgt</span>  [${t.x.toFixed(4)}, ${t.y.toFixed(4)}, ${t.z.toFixed(4)}]` : '')
+  })
+  return null
 }
 
 export default function App() {
-  const [selectedCarId, setSelectedCarId] = useState('rx7')
-  const [transforms, setTransforms] = useState(
-    Object.fromEntries(CARS.map(c => [c.id, { ...CAR_DEFAULTS[c.id] }]))
-  )
-  const [garageInfo, setGarageInfo] = useState(null)
-  const [showAxes, setShowAxes] = useState(false)
-
-  // Pre-mark all cars as fitted so SceneFitter only handles the camera
-  const garageInfoRef = useRef(false)
-  const autoFittedRef = useRef(new Set(CARS.map(c => c.id)))
-  const autoTransformsRef = useRef(
-    Object.fromEntries(CARS.map(c => [c.id, { ...CAR_DEFAULTS[c.id] }]))
-  )
-
-  const selectedCar = CARS.find(c => c.id === selectedCarId)
-  const t = transforms[selectedCarId]
-
-  const handleFitGarage = useCallback(({ size, center, box }) => {
-    if (garageInfoRef.current) return
-    garageInfoRef.current = true
-    setGarageInfo({ size, center, box })
-  }, [])
-
-  const handleFitCar = useCallback((carId, transform) => {
-    autoTransformsRef.current[carId] = transform
-    if (autoFittedRef.current.has(carId)) return
-    autoFittedRef.current.add(carId)
-    setTransforms(prev => ({ ...prev, [carId]: transform }))
-  }, [])
-
-  const updateTransform = (key, value) => {
-    setTransforms(prev => ({
-      ...prev,
-      [selectedCarId]: { ...prev[selectedCarId], [key]: parseFloat(value) },
-    }))
-  }
-
-  const resetTransform = () => {
-    const auto = autoTransformsRef.current[selectedCarId]
-    setTransforms(prev => ({
-      ...prev,
-      [selectedCarId]: auto ? { ...auto } : { ...CAR_DEFAULTS[selectedCarId] },
-    }))
-  }
-
-  const posRange = garageInfo ? Math.max(garageInfo.size.x, garageInfo.size.z) * 0.8 : 2
-  const scaleMax = garageInfo ? Math.min(garageInfo.size.x, garageInfo.size.z) * 0.3 : 0.5
+  const controlsRef = useRef()
+  const debugDomRef = useRef()
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <Canvas
-        camera={{ position: [0, 3, 8], fov: 60 }}
-        gl={{ antialias: true }}
-      >
-        <color attach="background" args={['#0a0a0a']} />
-
-        {/* IBL provides most of the lighting — fills the garage interior */}
-        <ambientLight intensity={1.5} />
-        <directionalLight position={[0, 5, 2]} intensity={1.5} />
-        <pointLight position={[0, 1, 0]} intensity={3} decay={2} color="#fff8e7" />
-        <pointLight position={[0, 0.5, 1]} intensity={2} decay={2} color="#fff4e0" />
-
+      <Canvas camera={{ position: [-0.7412, -0.1175, 0.7313], fov: 60 }}>
+        <color attach="background" args={['#111']} />
+        <ambientLight intensity={2} />
+        <directionalLight position={[0, 2, 1]} intensity={2} />
         <Suspense fallback={null}>
           <Environment preset="warehouse" />
           <Garage url={garageUrl} />
-          <Car
-            key={selectedCarId}
-            url={selectedCar.url}
-            position={[t.px, t.py, t.pz]}
-            rotation={[0, t.ry * (Math.PI / 180), 0]}
-            scale={t.scale}
-          />
-          <SceneFitter
-            garageUrl={garageUrl}
-            carUrl={selectedCar.url}
-            carId={selectedCarId}
-            onFitGarage={handleFitGarage}
-            onFitCar={handleFitCar}
-          />
+
+          <Car url={carreraUrl} position={[-0.47, -0.2335, 0.45]} rotation={[0, 106 * DEG, 0]} scale={0.09} />
+          <Car url={rx7Url}     position={[-0.60, -0.09,   0.10]} rotation={[0,  50 * DEG, 0]} scale={0.12} />
+
+          <BlobShadow position={[-0.5, -0.225, 0.46]} width={0.665} length={0.36} opacity={0.85} />
+          <BlobShadow position={[-0.397, -0.225, 0.008]} width={0.665} length={0.36} opacity={0.85} yRotation={-43 * DEG} />
+
         </Suspense>
 
-        {showAxes && <axesHelper args={[posRange * 0.5]} />}
-        <OrbitControls makeDefault enableDamping dampingFactor={0.06} />
+        <OrbitControls ref={controlsRef} target={[-0.485, -0.155, 0.43]} makeDefault enableDamping dampingFactor={0.06} />
+        <CameraShake maxYaw={0.10} maxPitch={0.10} maxRoll={0.006} yawFrequency={0.15} pitchFrequency={0.15} rollFrequency={0.2} intensity={0.8} />
+        <CameraDebug controlsRef={controlsRef} domRef={debugDomRef} />
+
       </Canvas>
 
-      <UI
-        cars={CARS}
-        selectedCarId={selectedCarId}
-        onSelectCar={setSelectedCarId}
-        transform={t}
-        onUpdateTransform={updateTransform}
-        onResetTransform={resetTransform}
-        showAxes={showAxes}
-        onToggleAxes={() => setShowAxes(v => !v)}
-        posRange={posRange}
-        scaleMax={scaleMax}
+      <div
+        ref={debugDomRef}
+        style={{
+          position: 'fixed', bottom: 16, left: 16,
+          background: 'rgba(0,0,0,0.8)', color: '#00ff88',
+          fontFamily: 'monospace', fontSize: 13,
+          padding: '8px 14px', borderRadius: 8, lineHeight: 1.8,
+          pointerEvents: 'none', zIndex: 1000,
+          border: '1px solid rgba(0,255,136,0.2)',
+        }}
       />
     </div>
   )
