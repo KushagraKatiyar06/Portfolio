@@ -10,7 +10,7 @@ Live site: [kushagrakatiyar06.github.io/Portfolio-v2](https://kushagrakatiyar06.
 
 **Frontend:** React 18, Vite
 **3D:** Three.js, React Three Fiber, React Three Drei
-**Models:** Custom `.glb` models (garage, RX-7 FD, Carrera GT)
+**Models:** Custom .glb models (garage, RX-7 FD, Carrera GT)
 **Deployment:** GitHub Actions → GitHub Pages
 
 ---
