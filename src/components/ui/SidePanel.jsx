@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ExperienceSection from './ExperienceSection'
 import ProjectsSection from './ProjectsSection'
 import { profile, social, skills } from '../../data/portfolio'
@@ -13,50 +13,77 @@ const SECTION_META = {
 const WIDTH_NORMAL   = 520
 const WIDTH_EXPANDED = 860
 
-// panelMode: 'normal' | 'expanded' | 'hidden'
-// cycle: normal → expanded → hidden → normal
+const NAV_ITEMS = [
+  { id: 'about',      label: 'About' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'projects',   label: 'Projects' },
+]
 
-export default function SidePanel({ section, showAbout }) {
-  const [rendered,   setRendered]   = useState(section)
-  const [panelMode,  setPanelMode]  = useState('normal')
+export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose }) {
+  const [rendered, setRendered] = useState(section)
+  const outerRef  = useRef()
+  const dragState = useRef({ active: false, startX: 0 })
 
   useEffect(() => {
     if (section !== 'about' || showAbout) setRendered(section)
   }, [section, showAbout])
 
-  // Reset to normal when section changes
-  useEffect(() => { setPanelMode('normal') }, [section])
-
   const open  = panelMode !== 'hidden' && (section !== 'about' || showAbout)
   const width = panelMode === 'expanded' ? WIDTH_EXPANDED : WIDTH_NORMAL
   const meta  = SECTION_META[rendered] ?? SECTION_META.about
 
-  const cycleMode = () => {
-    setPanelMode(m => {
-      if (m === 'normal')   return 'expanded'
-      if (m === 'expanded') return 'hidden'
-      return 'normal'
-    })
+  // Drag-to-close: attach to the panel header so it doesn't conflict with scrolling
+  const handleDragStart = e => {
+    if (!open) return
+    dragState.current = { active: true, startX: e.clientX }
+
+    const onMove = ev => {
+      if (!dragState.current.active) return
+      const delta = Math.max(0, ev.clientX - dragState.current.startX)
+      if (outerRef.current) {
+        outerRef.current.style.transition = 'none'
+        outerRef.current.style.transform  = `translateX(${delta}px)`
+      }
+    }
+
+    const onUp = ev => {
+      if (!dragState.current.active) return
+      dragState.current.active = false
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup',   onUp)
+      const delta = Math.max(0, ev.clientX - dragState.current.startX)
+      if (outerRef.current) outerRef.current.style.transition = ''
+      if (delta > 120) {
+        onManualClose?.()
+      } else {
+        if (outerRef.current) outerRef.current.style.transform = 'translateX(0)'
+      }
+    }
+
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup',   onUp)
   }
 
-  // Chevron: left = expand/open, right = collapse/close
   const chevronLeft  = <path d="M8 2L4 6l4 4" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   const chevronRight = <path d="M4 2l4 4-4 4" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
 
   return (
-    <div style={{
-      position: 'fixed', right: 0, top: 0, bottom: 0,
-      width,
-      zIndex: 26,
-      transform: open ? 'translateX(0)' : 'translateX(100%)',
-      transition: 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), width 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
-      overflow: 'visible',
-      pointerEvents: open ? 'auto' : 'none',
-    }}>
+    <div
+      ref={outerRef}
+      style={{
+        position: 'fixed', right: 0, top: 0, bottom: 0,
+        width,
+        zIndex: 26,
+        transform: open ? 'translateX(0)' : 'translateX(100%)',
+        transition: 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), width 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+        overflow: 'visible',
+        pointerEvents: open ? 'auto' : 'none',
+      }}
+    >
 
-      {/* Left-edge toggle tab */}
+      {/* Left-edge toggle tab — always pointer events so user can reopen */}
       <button
-        onClick={cycleMode}
+        onClick={onCycleMode}
         title={panelMode === 'normal' ? 'Expand' : panelMode === 'expanded' ? 'Close' : 'Open'}
         style={{
           position: 'absolute',
@@ -93,33 +120,69 @@ export default function SidePanel({ section, showAbout }) {
         overflow: 'hidden',
       }}>
 
-        {/* Header */}
-        <div style={{
-          padding: '22px 24px 16px',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
-          flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
-          <div>
+        {/* Header — drag handle + full-width section nav */}
+        <div
+          onMouseDown={handleDragStart}
+          style={{
+            flexShrink: 0,
+            cursor: 'grab', userSelect: 'none',
+          }}
+        >
+          {/* 3-column nav */}
+          <div style={{ display: 'flex' }}>
+            {NAV_ITEMS.map(({ id, label }) => {
+              const active = section === id
+              const itemAccent = SECTION_META[id].accent
+              return (
+                <button
+                  key={id}
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={() => onSection?.(id)}
+                  style={{
+                    flex: 1,
+                    background: 'none',
+                    border: 'none',
+                    padding: '18px 8px 14px',
+                    cursor: 'pointer',
+                    fontFamily: 'Imprima, sans-serif',
+                    fontSize: active ? 'clamp(0.9rem, 1.6vw, 1.1rem)' : 'clamp(0.72rem, 1.2vw, 0.85rem)',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.32)',
+                    textShadow: active
+                      ? `0 0 18px ${itemAccent === '#fff' ? 'rgba(255,255,255,0.55)' : itemAccent + '90'}`
+                      : 'none',
+                    letterSpacing: '0.02em',
+                    transition: 'color 0.3s ease, font-size 0.3s ease, text-shadow 0.3s ease',
+                  }}
+                  onMouseEnter={e => {
+                    if (!active) e.currentTarget.style.color = 'rgba(255,255,255,0.65)'
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) e.currentTarget.style.color = 'rgba(255,255,255,0.32)'
+                  }}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Sliding indicator line */}
+          <div style={{ position: 'relative', height: 2, background: 'rgba(255,255,255,0.07)' }}>
             <div style={{
-              fontFamily: 'Imprima, sans-serif',
-              fontSize: 'clamp(1rem, 1.8vw, 1.3rem)',
-              color: '#fff',
-              textShadow: `0 0 20px ${meta.accent === '#fff' ? 'rgba(255,255,255,0.5)' : meta.accent + '60'}`,
-              letterSpacing: '0.02em',
-            }}>
-              {meta.label}
-            </div>
-            <div style={{
-              width: 32, height: 2, marginTop: 6,
+              position: 'absolute',
+              top: 0, left: 0,
+              width: `${100 / NAV_ITEMS.length}%`,
+              height: '100%',
               background: meta.accent,
-              boxShadow: `0 0 8px ${meta.accent}`,
+              boxShadow: `0 0 10px ${meta.accent}`,
+              transform: `translateX(${NAV_ITEMS.findIndex(n => n.id === section) * 100}%)`,
+              transition: 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease, box-shadow 0.3s ease',
             }} />
           </div>
         </div>
 
         {/* Scrollable content */}
-        <div style={{
+        <div className="v1-scroll" style={{
           flex: 1, overflowY: 'auto', overflowX: 'hidden',
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255,255,255,0.08) transparent',
@@ -133,18 +196,20 @@ export default function SidePanel({ section, showAbout }) {
   )
 }
 
-// ─── About section (shown in sidebar when section = about) ────
+// ─── About section ────────────────────────────────────────────
 function AboutSection() {
   return (
     <div style={{ padding: '28px 24px 48px' }}>
+
       {/* Profile block */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
         <div style={{
           width: 68, height: 68, borderRadius: '50%', overflow: 'hidden',
           boxShadow: '0 0 0 2px white', flexShrink: 0,
         }}>
-          <img src={profile.avatar} alt={profile.name} style={{
-            width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top',
+          <img src={a('/assets/profile_picture_landing.jpg')} alt={profile.name} style={{
+            width: '120%', height: 'auto',
+            position: 'relative', top: '-41px', left: '-5px',
           }} />
         </div>
         <div>
@@ -179,8 +244,8 @@ function AboutSection() {
         </div>
       </div>
 
-      {/* Social */}
-      <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
+      {/* Social links */}
+      <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
         {social.map(({ href, icon, label }) => (
           <a key={label} href={href} target="_blank" rel="noreferrer" title={label} className="link-icon">
             <img src={icon} alt={label} style={{
@@ -191,6 +256,42 @@ function AboutSection() {
           </a>
         ))}
       </div>
+
+      {/* Resume download — matching V1 style */}
+      <a
+        href={profile.resume}
+        download
+        target="_blank"
+        rel="noreferrer"
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          marginBottom: 24, padding: '7px 16px',
+          border: '1px solid rgba(255,255,255,0.18)',
+          borderRadius: 6, textDecoration: 'none',
+          fontFamily: 'Imprima, sans-serif',
+          fontSize: '0.75rem', letterSpacing: '0.12em',
+          textTransform: 'uppercase', color: 'rgba(255,255,255,0.78)',
+          transition: 'background 0.2s, border-color 0.2s, color 0.2s',
+          background: 'transparent',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.38)'
+          e.currentTarget.style.color = '#fff'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'transparent'
+          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'
+          e.currentTarget.style.color = 'rgba(255,255,255,0.78)'
+        }}
+      >
+        <img
+          src={a('/assets/resume.svg')}
+          alt=""
+          style={{ width: 15, height: 15, filter: 'brightness(0) invert(1)', opacity: 0.8 }}
+        />
+        View Resume
+      </a>
 
       {/* Bio */}
       <div style={{
@@ -203,12 +304,12 @@ function AboutSection() {
         {profile.bio}
       </div>
 
-      {/* Tech stack — compact icon grid */}
+      {/* Tech stack icon grid */}
       {Object.entries(skills).map(([cat, items]) => (
         <div key={cat} style={{ marginBottom: 20 }}>
           <div style={{
             fontFamily: 'Imprima, sans-serif',
-            fontSize: 9, letterSpacing: '0.22em',
+            fontSize: 10, letterSpacing: '0.22em',
             textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
             marginBottom: 10,
           }}>

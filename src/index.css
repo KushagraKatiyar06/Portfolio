@@ -15,17 +15,9 @@ body {
 .v1-icon:hover { transform: translateY(-4px) scale(1.15); }
 .v1-icon img { filter: drop-shadow(0 0 5px rgba(255,255,255,0.25)); transition:filter 0.3s; }
 .v1-icon:hover img { filter: drop-shadow(0 0 9px rgba(255,255,255,0.6)); }
-.v1-icon::after {
-  content: attr(data-tip);
-  position:absolute; bottom:-26px; left:50%; transform:translateX(-50%);
-  background:rgba(0,0,0,0.9); color:#fff;
-  padding:3px 8px; border-radius:4px; font-size:11px;
-  font-family:Imprima,sans-serif; white-space:nowrap;
-  pointer-events:none; z-index:300;
-  border:1px solid rgba(255,255,255,0.12);
-  opacity:0; transition:opacity 0.2s; letter-spacing:0.04em;
-}
-.v1-icon:hover::after { opacity:1; }
+/* Tooltip is handled by global fixed-position JS tooltip in App.jsx
+   (position:fixed escapes overflow:hidden/auto clipping in scroll containers) */
+.v1-icon::after { display: none; }
 
 .link-icon { display:inline-flex; cursor:pointer; transition:transform 0.3s; }
 .link-icon:hover { transform:scale(1.2); }

@@ -88,17 +88,21 @@ export default function ProfilePanel({ visible, onClose }) {
             display: 'flex', alignItems: 'center', gap: 32,
             marginBottom: 40,
           }}>
-            <img
-              src={profile.avatar}
-              alt={profile.name}
-              style={{
-                width: 100, height: 100,
-                borderRadius: '50%',
-                border: '2px solid rgba(255,255,255,0.7)',
-                boxShadow: '0 0 30px rgba(255,255,255,0.18)',
-                objectFit: 'cover', flexShrink: 0,
-              }}
-            />
+            <div style={{
+              width: 100, height: 100, borderRadius: '50%', overflow: 'hidden',
+              border: '2px solid rgba(255,255,255,0.7)',
+              boxShadow: '0 0 30px rgba(255,255,255,0.18)',
+              flexShrink: 0,
+            }}>
+              <img
+                src={profile.avatar}
+                alt={profile.name}
+                style={{
+                  width: '120%', height: 'auto',
+                  position: 'relative', top: '-86px', left: '-5px',
+                }}
+              />
+            </div>
             <div>
               <h1 style={{
                 margin: 0,

@@ -1,4 +1,5 @@
 import { profile } from '../../data/portfolio'
+import { a } from '../../utils/asset'
 
 const ITEMS = [
   { id: 'about',      label: 'About' },
@@ -6,7 +7,7 @@ const ITEMS = [
   { id: 'projects',   label: 'Projects' },
 ]
 
-export default function SectionNav({ section, onSection, disabled, dimmed }) {
+export default function SectionNav({ section, onSection, disabled, dimmed, onLogoClick }) {
   return (
     <nav
       style={{
@@ -33,9 +34,10 @@ export default function SectionNav({ section, onSection, disabled, dimmed }) {
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      {/* Profile image — same as V1 nav_logo_container */}
+      {/* Profile image — click to return to splash (V1: back to top) */}
       <div
-        onClick={() => onSection('about')}
+        onClick={() => onLogoClick?.()}
+        title="Back to top"
         style={{
           width: 50, height: 50, borderRadius: '50%', overflow: 'hidden',
           boxShadow: '0 0 0 2px white',
@@ -47,9 +49,13 @@ export default function SectionNav({ section, onSection, disabled, dimmed }) {
         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
       >
         <img
-          src={profile.avatar}
+          src={a('/assets/navbar_profile_photo.jpg')}
           alt={profile.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+          style={{
+            width: '99%', height: 'auto',
+            objectFit: 'cover',
+            position: 'relative', top: '2px', left: '-0.5px',
+          }}
         />
       </div>
 

@@ -22,6 +22,7 @@ export default function EnterPrompt({ onEnter }) {
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 27,
+        animation: 'promptFadeIn 0.5s ease forwards',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -60,6 +61,10 @@ export default function EnterPrompt({ onEnter }) {
         @keyframes bounceDown {
           0%, 100% { transform: translateY(0); }
           50%       { transform: translateY(5px); }
+        }
+        @keyframes promptFadeIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
       `}</style>
     </div>

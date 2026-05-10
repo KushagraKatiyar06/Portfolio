@@ -9,7 +9,7 @@ export const profile = {
   title:    'CS @ University of Florida | Full-Stack Developer',
   location: 'Lake Mary, Florida',
   bio:      "I am pursuing a bachelor's in Computer Science at the University of Florida. I specialize in Full Stack development but have experience in Product Management and UI/UX Design. I have shipped real world applications and hold leadership on campus demonstrating my skills in teamwork, communication, and problem-solving. Outside of tech my interests include gaming, cars, and Taekwondo. I post flute videos on tiktok and instagram, accumulating over 500,000 views.",
-  avatar:   a('/assets/profile.jpg'),
+  avatar:   a('/assets/profile_picture_landing.jpg'),
   resume:   a('/assets/Kushagra_Katiyar_Software_Engineering_Resume.pdf'),
 }
 

@@ -88,7 +88,8 @@ export default function FullPortfolio({ visible, onClose }) {
             alignSelf: 'center', flexShrink: 0,
           }}>
             <img src={profile.avatar} alt={profile.name} style={{
-              width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top',
+              width: '120%', height: 'auto',
+              position: 'relative', top: '-86px', left: '-5px',
             }} />
           </div>
 
