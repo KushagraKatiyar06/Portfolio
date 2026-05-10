@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { CameraControls, Environment, useGLTF, CameraShake, AdaptiveDpr, Preload } from '@react-three/drei'
+import { CameraControls, Environment, useGLTF, AdaptiveDpr, Preload } from '@react-three/drei'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { Vector3 } from 'three'
 import Garage from './components/Garage'
@@ -262,7 +262,6 @@ export default function App() {
           introComplete={introComplete}
           onIntroComplete={onIntroComplete}
         />
-        <CameraShake maxYaw={0.10} maxPitch={0.10} maxRoll={0.006} yawFrequency={0.15} pitchFrequency={0.15} rollFrequency={0.2} intensity={0.8} />
         <AdaptiveDpr pixelated />
       </Canvas>
 
@@ -289,7 +288,7 @@ export default function App() {
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 40 }}>
             <div style={{
               width: 160, height: 160, borderRadius: '50%', overflow: 'hidden',
               boxShadow: '0 0 0 2px white', flexShrink: 0,
@@ -299,7 +298,7 @@ export default function App() {
                 position: 'relative', top: '-86px', left: '-5px',
               }} />
             </div>
-            <div>
+            <div style={{ paddingTop: 28 }}>
               <h1 style={{
                 fontFamily: 'Imprima, sans-serif', fontSize: 'clamp(2rem, 4vw, 3rem)',
                 color: '#fff', textShadow: '0 0 24px rgba(255,255,255,0.5)',
@@ -321,28 +320,13 @@ export default function App() {
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 color: 'rgba(255,255,255,0.5)', fontFamily: 'Imprima, sans-serif',
-                fontSize: 'clamp(0.82rem, 1.2vw, 0.95rem)', marginBottom: 20,
+                fontSize: 'clamp(0.82rem, 1.2vw, 0.95rem)',
               }}>
                 <img src={a('/assets/location_icon.svg')} alt="" style={{
                   width: 15, height: 15, flexShrink: 0,
                   filter: 'brightness(0) invert(1)', opacity: 0.6,
                 }} />
                 {profile.location}
-              </div>
-              <div style={{ display: 'flex', gap: 18 }}>
-                {social.map(({ href, icon, label }) => (
-                  <a key={label} href={href} target="_blank" rel="noreferrer" title={label}
-                    style={{ display: 'inline-flex' }}>
-                    <img src={icon} alt={label} style={{
-                      width: 28, height: 28,
-                      filter: 'brightness(0) invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.4))',
-                      opacity: 0.75, transition: 'opacity 0.2s, filter 0.2s',
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.9))' }}
-                      onMouseLeave={e => { e.currentTarget.style.opacity = '0.75'; e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.4))' }}
-                    />
-                  </a>
-                ))}
               </div>
             </div>
           </div>
