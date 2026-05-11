@@ -51,6 +51,7 @@ const BIO_PHRASES = [
   { phrase: 'Full Stack Development',                       color: '#48bcff' },
   { phrase: 'UI/UX Design',                                color: '#ffd166' },
   { phrase: 'my interests include gaming, cars, and Taekwondo', color: '#7CFC98' },
+  { phrase: 'flute', color: '#7CFC98' },
 ]
 
 function hlBio(text) {
