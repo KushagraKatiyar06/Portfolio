@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { profile, social, skills, experiences, projects } from '../../data/portfolio'
 import { a } from '../../utils/asset'
+import SplashParticles from './SplashParticles'
+import Rx7CursorFollower from './Rx7CursorFollower'
 
 // ─── Tech terms highlighted blue in bullets ───────────────────
 const TECH_TERMS = [
@@ -80,6 +82,40 @@ const NAV_TABS = [
   { id: 'experience', label: 'Experience' },
   { id: 'projects',   label: 'Projects'   },
 ]
+
+// Sorting function: PRESENT at top, then by start date (most recent first), then prefer technical
+function sortExperiences(items) {
+  return items.sort((a, b) => {
+    const aIsPresent = a.duration.includes('Present')
+    const bIsPresent = b.duration.includes('Present')
+    
+    // Both present or both not present
+    if (aIsPresent === bIsPresent) {
+      // Extract start month/year from duration
+      const getStartDate = (duration) => {
+        const [start] = duration.split(' – ')
+        const months = { January: 1, February: 2, March: 3, April: 4, May: 5, June: 6, July: 7, August: 8, September: 9, October: 10, November: 11, December: 12 }
+        const [month, year] = start.split(' ')
+        return new Date(parseInt(year), months[month] - 1)
+      }
+      
+      const dateA = getStartDate(a.duration)
+      const dateB = getStartDate(b.duration)
+      
+      // More recent start date first
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateB.getTime() - dateA.getTime()
+      }
+      
+      // If same date, prefer technical roles (experience) over others
+      const typeOrder = { experience: 0, leadership: 1, extracurricular: 2 }
+      return (typeOrder[a.type] ?? 3) - (typeOrder[b.type] ?? 3)
+    }
+    
+    // Present comes before non-present
+    return aIsPresent ? -1 : 1
+  })
+}
 
 const EXP_GROUPS = [
   { key: 'experience',      label: 'Professional Experience', accent: '#48bcff' },
@@ -206,10 +242,22 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
         }} />
       )}
 
-      {/* Social column — right */}
+      {/* Particles background */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: show ? 0.4 : 0, transition: 'opacity 0.8s ease' }}>
+        <SplashParticles />
+      </div>
+
+      {/* RX7 cursor follower */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', opacity: show ? 0.7 : 0, transition: 'opacity 0.8s ease' }}>
+        <Rx7CursorFollower visible={show} />
+      </div>
+
+      {/* Social column — right (hidden on mobile) */}
       <div style={{
         position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)',
         zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
+        '@media (max-width: 768px)': { display: 'none' },
+        ...(isMobile ? { display: 'none' } : {}),
       }}>
         {social.map(({ href, icon, label }) => (
           <a key={label} href={href} target="_blank" rel="noreferrer" title={label}
@@ -242,8 +290,10 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
         {/* Tab content — fixed height, scrollable */}
         <div className="v1-scroll" style={{
           flex: 1, overflowY: 'auto', overflowX: 'hidden',
-          paddingTop: 80, // clear navbar
-          paddingRight: 48, // clear social column
+          paddingTop: isMobile ? 'clamp(60px, 12vw, 80px)' : 80,
+          paddingRight: isMobile ? '20px' : 48,
+          paddingLeft: isMobile ? '16px' : 0,
+          paddingBottom: isMobile ? '20px' : 0,
         }}>
           <div key={transitionKey} style={{ animation: 'tabFadeIn 0.35s ease-out forwards' }}>
             {tab === 'about'      && <AboutTab />}
@@ -280,13 +330,13 @@ function NavBar({ tab, switchTab, onLogoClick, onClose }) {
     <nav
       ref={navRef}
       style={{
-        position: 'absolute', top: '1rem',
+        position: 'absolute', top: '0.65rem',
         left: '50%', transform: 'translateX(-50%)',
         display: 'flex', flexDirection: 'row',
-        alignItems: 'center', gap: '2.5rem',
+        alignItems: 'center', gap: '1.6rem',
         background: 'rgba(0,0,0,0)',
         border: '1px solid rgba(255,255,255,0)',
-        borderRadius: 50, padding: '0.75rem 2rem',
+        borderRadius: 50, padding: '0.5rem 1.4rem',
         zIndex: 10, transition: 'all 0.4s ease',
         whiteSpace: 'nowrap',
       }}
@@ -306,8 +356,8 @@ function NavBar({ tab, switchTab, onLogoClick, onClose }) {
         onClick={() => { onLogoClick?.(); onClose() }}
         title="Back to splash"
         style={{
-          width: 50, height: 50, borderRadius: '50%', overflow: 'hidden',
-          boxShadow: '0 0 0 2px white', flexShrink: 0,
+          width: 38, height: 38, borderRadius: '50%', overflow: 'hidden',
+          boxShadow: '0 0 0 1.5px white', flexShrink: 0,
           cursor: 'pointer', transition: 'transform 0.3s ease',
         }}
         onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
@@ -327,7 +377,7 @@ function NavBar({ tab, switchTab, onLogoClick, onClose }) {
             <button key={id} onClick={() => switchTab(id)} style={{
               background: 'none', border: 'none', cursor: 'pointer',
               fontFamily: 'Imprima, sans-serif',
-              fontSize: 'clamp(1rem, 1.4vw, 1.5rem)',
+              fontSize: 'clamp(0.82rem, 1.1vw, 1.1rem)',
               color: active ? '#fff' : 'rgba(255,255,255,0.6)',
               textShadow: active
                 ? '0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.3)'
@@ -370,11 +420,20 @@ function NavBar({ tab, switchTab, onLogoClick, onClose }) {
 
 // ─── About ────────────────────────────────────────────────────
 function AboutTab() {
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
   return (
-    <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 48px 64px' }}>
+    <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
 
       {/* Badges row + Resume on the right */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'nowrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : 'space-between', gap: 16, marginBottom: 28, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap' }}>
           {[
             { label: 'Agentic AI Systems',     color: '#b187ff' },
@@ -391,7 +450,7 @@ function AboutTab() {
             </span>
           ))}
         </div>
-        <ResumeButton />
+        {!isMobile && <ResumeButton />}
       </div>
 
       <SectionHeading>About Me</SectionHeading>
@@ -432,13 +491,22 @@ function AboutTab() {
 
 // ─── Experience ───────────────────────────────────────────────
 function ExperienceTab({ expTab, setExpTab }) {
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
   const group  = EXP_GROUPS.find(g => g.key === expTab) ?? EXP_GROUPS[0]
-  const items  = experiences.filter(e => e.type === expTab)
+  const items  = sortExperiences(experiences.filter(e => e.type === expTab))
   return (
-    <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 48px 64px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28 }}>
+    <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
         <SubTabBar tabs={EXP_GROUPS} active={expTab} setActive={setExpTab} />
-        <ResumeButton />
+        {!isMobile && <ResumeButton />}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         {items.map((item, i) => <ExperienceCard key={i} item={item} accent={group.accent} />)}
@@ -455,6 +523,7 @@ function ExperienceCard({ item, accent }) {
       backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
       padding: '20px 22px', display: 'flex', gap: 18,
       transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
+      position: 'relative', zIndex: 3,
     }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.4)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)' }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
@@ -498,17 +567,26 @@ function ExperienceCard({ item, accent }) {
 
 // ─── Projects ─────────────────────────────────────────────────
 function ProjectsTab({ projTab, setProjTab }) {
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
   const group = PROJ_GROUPS.find(g => g.key === projTab) ?? PROJ_GROUPS[0]
   const items = projects[projTab] ?? []
   return (
-    <div style={{ maxWidth: 920, margin: '0 auto', padding: '32px 48px 64px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28 }}>
+    <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
         <SubTabBar tabs={PROJ_GROUPS} active={projTab} setActive={setProjTab} />
-        <ResumeButton />
+        {!isMobile && <ResumeButton />}
       </div>
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(260px, 1fr))',
         gap: 22,
         alignItems: 'start',
       }}>
@@ -526,7 +604,7 @@ function ProjectCard({ item, accent }) {
       background: 'rgba(0,0,0,0.48)',
       backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
       display: 'flex', flexDirection: 'column',
-      position: 'relative',
+      position: 'relative', zIndex: 3,
       transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
     }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}

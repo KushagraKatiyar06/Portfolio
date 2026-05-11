@@ -44,11 +44,11 @@ export default function Rx7CursorFollower({ visible }) {
       mouseTarget.x = cursorLag.x + anchorOffset.x + Math.sin(now * 0.0009) * 8
       mouseTarget.y = cursorLag.y + anchorOffset.y + Math.cos(now * 0.0011) * 10
 
-      dragTarget.x += (mouseTarget.x - dragTarget.x) * 0.045
-      dragTarget.y += (mouseTarget.y - dragTarget.y) * 0.045
+      dragTarget.x += (mouseTarget.x - dragTarget.x) * 0.08
+      dragTarget.y += (mouseTarget.y - dragTarget.y) * 0.08
 
-      rx7.vx = (rx7.vx + (dragTarget.x - rx7.x) * 0.012) * 0.94
-      rx7.vy = (rx7.vy + (dragTarget.y - rx7.y) * 0.012) * 0.94
+      rx7.vx = (rx7.vx + (dragTarget.x - rx7.x) * 0.025) * 0.92
+      rx7.vy = (rx7.vy + (dragTarget.y - rx7.y) * 0.025) * 0.92
       rx7.x += rx7.vx
       rx7.y += rx7.vy
 

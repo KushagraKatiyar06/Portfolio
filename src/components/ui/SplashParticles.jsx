@@ -12,11 +12,11 @@ export default function SplashParticles() {
     let w = (canvas.width  = window.innerWidth)
     let h = (canvas.height = window.innerHeight)
 
-    const count = Math.min(120, Math.max(55, Math.floor(w / 16)))
+    const count = Math.min(180, Math.max(75, Math.floor(w / 12)))
     const pts = Array.from({ length: count }, () => ({
       x: rand(0, w), y: rand(0, h),
-      vx: rand(-0.26, 0.26), vy: rand(-0.18, 0.18),
-      r: rand(0.8, 2.6), a: rand(0.18, 0.58),
+      vx: rand(-0.42, 0.42), vy: rand(-0.32, 0.32),
+      r: rand(0.9, 3.2), a: rand(0.28, 0.72),
     }))
 
     let raf
@@ -51,7 +51,7 @@ export default function SplashParticles() {
       style={{
         position: 'absolute', inset: 0,
         width: '100%', height: '100%',
-        opacity: 0.38, pointerEvents: 'none',
+        opacity: 0.52, pointerEvents: 'none',
       }}
     />
   )

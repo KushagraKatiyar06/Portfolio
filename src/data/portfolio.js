@@ -86,7 +86,7 @@ export const experiences = [
     type: 'extracurricular',
     org: 'Swamp Records',
     role: 'UI/UX Designer',
-    duration: 'January 2025 – April 2026',
+    duration: 'January 2026 – April 2026',
     location: 'Gainesville, Florida',
     logo: a('/assets/orgs/swamprecords.jpg'),
     bullets: [
@@ -196,7 +196,7 @@ export const experiences = [
     ],
   },
   {
-    type: 'extracurricular',
+    type: 'leadership',
     org: 'TikTok',
     role: 'Content Creator',
     duration: 'December 2025 – Present',
@@ -229,7 +229,7 @@ export const experiences = [
     type: 'leadership',
     org: 'Computing Student Union',
     role: 'Membership Director',
-    duration: 'May 2025 – Present',
+    duration: 'May 2025 – January 2026',
     location: 'Gainesville, Florida',
     logo: a('/assets/orgs/csu.png'),
     bullets: [

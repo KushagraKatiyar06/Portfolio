@@ -292,6 +292,7 @@ export default function App() {
   const splashFlashKey  = useRef(0)
   const splashExitTimer = useRef(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [canLoadCanvas, setCanLoadCanvas] = useState(false)
   
   // Detect mobile on mount and on resize
   useEffect(() => {
@@ -312,7 +313,10 @@ export default function App() {
     setPanelMode('hidden')
   }, [])
 
-  const closePortfolio = useCallback(() => setPortfolioOpen(false), [])
+  const closePortfolio = useCallback(() => {
+    setPortfolioOpen(false)
+    setCanLoadCanvas(true)
+  }, [])
 
   // Going to splash always resets intro so the camera drop plays again
   const goToSplash = useCallback(() => {
@@ -322,12 +326,14 @@ export default function App() {
     manualCloseRef.current = false
     setPortfolioOpen(false)
     setIntroComplete(false)
+    setCanLoadCanvas(false)
   }, [])
 
   const exitSplash = useCallback(() => {
     if (phase !== 'splash') return
     splashFlashKey.current++
     setSplashFlashing(false)
+    setCanLoadCanvas(true)
     requestAnimationFrame(() => requestAnimationFrame(() => setSplashFlashing(true)))
     clearTimeout(splashExitTimer.current)
     splashExitTimer.current = setTimeout(() => {
@@ -397,16 +403,14 @@ export default function App() {
     return () => window.removeEventListener('keydown', fn)
   }, [phase])
 
-  // Lights flash when web view rises
+  // Removed: Lights flash on webview open (user preference)
+
+  // Handle webview transitions - unload Canvas when opening webview
   useEffect(() => {
-    if (!portfolioOpen) return
-    portfolioFlashKey.current++
-    clearTimeout(portfolioFlashTimer.current)
-    setPortfolioFlashing(false)
-    const raf = requestAnimationFrame(() => requestAnimationFrame(() => setPortfolioFlashing(true)))
-    portfolioFlashTimer.current = setTimeout(() => setPortfolioFlashing(false), 1600)
-    return () => { cancelAnimationFrame(raf); clearTimeout(portfolioFlashTimer.current) }
-  }, [portfolioOpen])
+    if (portfolioOpen && canLoadCanvas) {
+      setCanLoadCanvas(false)
+    }
+  }, [portfolioOpen, canLoadCanvas])
 
   // D: debug mode / reset
   useEffect(() => {
@@ -480,17 +484,16 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh', fontFamily: 'Imprima, sans-serif' }}>
 
-      {/* -- 3D Canvas (Desktop only) -- */}
-      {!isMobile && <Canvas
+      {/* -- 3D Canvas (Desktop only, lazy loaded) -- */}
+      {!isMobile && canLoadCanvas && <Canvas
         camera={{ position: CAM_START, fov: 60 }}
-        dpr={[0.5, 1]}
+        dpr={portfolioOpen ? [0.5, 0.7] : [0.5, 1]}
         gl={{ powerPreference: 'high-performance', antialias: true }}
         performance={{ min: 0.5 }}
         onClick={handleSceneClick}
         style={{
-          transform: portfolioOpen ? 'scale(0.85)' : 'scale(1)',
-          transformOrigin: 'center',
-          transition: portfolioOpen ? 'none' : 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+          width: '100%',
+          height: '100%',
         }}
       >
         <color attach="background" args={['#0d0d0d']} />
