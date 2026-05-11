@@ -50,7 +50,7 @@ function GroupHeader({ label }) {
 }
 
 function ProjectCard({ item, expanded }) {
-  const primaryLink = item.live || item.video || null
+  const primaryLink = item.live || item.video || item.github || item.figma || item.drive || null
 
   return (
     <div style={{
@@ -139,6 +139,11 @@ function ProjectCard({ item, expanded }) {
           {item.figma && (
             <a href={item.figma} target="_blank" rel="noreferrer" title="Figma" className="link-icon">
               <img src={a('/assets/figma.svg')} alt="Figma" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+            </a>
+          )}
+          {item.drive && (
+            <a href={item.drive} target="_blank" rel="noreferrer" title="Google Drive" className="link-icon">
+              <img src={a('/assets/drive.svg')} alt="Google Drive" style={{ width: 24, height: 24, objectFit: 'contain' }} />
             </a>
           )}
         </div>

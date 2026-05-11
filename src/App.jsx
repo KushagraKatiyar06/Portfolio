@@ -119,11 +119,10 @@ function DebugOverlay({ debugInfoRef, carPositions, dragIndex }) {
 
 // --- Controls hint (top-left, faded, horizontal) ---
 const HINTS = [
-  { key: '← →', label: 'navigate' },
-  { key: '↑ ↓', label: 'web view' },
-  { key: 'click', label: 'cycle / open' },
-  { key: 'U',    label: 'hide controls' },
-  { key: 'D',    label: 'debug' },
+  { key: '← →',  label: 'cycle'        },
+  { key: '↑ ↓',  label: 'web view'     },
+  { key: 'click', label: 'open details' },
+  { key: 'U',     label: 'hide UI'      },
 ]
 
 function ControlsHint({ visible }) {
@@ -192,7 +191,7 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
       st: [ct.x, ct.y, ct.z],
       ep: [...pos],
       et: [...target],
-      elapsed: 0, dur: 1.6,
+      elapsed: 0, dur: 2.1,
       arc: needsArc ? 0.06 : 0, isIntro: false,
     }
   }, [section, introComplete, camera])
@@ -219,7 +218,7 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
       const tr = trans.current
       tr.elapsed += delta
       const rawT = Math.min(tr.elapsed / tr.dur, 1)
-      const exp  = tr.isIntro ? 6 : 5
+      const exp  = tr.isIntro ? 6 : 6
       const norm = 1 - Math.pow(2, -exp)
       const t    = rawT >= 1 ? 1 : (1 - Math.pow(2, -exp * rawT)) / norm
 
@@ -317,14 +316,15 @@ export default function App() {
     setPanelMode('hidden')
   }, [])
 
-  // 3D space click: first click opens sidebar, subsequent clicks cycle section
+  // 3D space click: toggle sidebar open / closed
   const handleSceneClick = useCallback(() => {
     if (debugMode || phase !== 'ready' || portfolioOpen) return
     if (panelMode === 'hidden') {
       manualCloseRef.current = false
       setPanelMode('normal')
     } else {
-      setSection(s => SECTIONS[(SECTIONS.indexOf(s) + 1) % SECTIONS.length])
+      manualCloseRef.current = true
+      setPanelMode('hidden')
     }
   }, [debugMode, phase, portfolioOpen, panelMode])
 
@@ -521,7 +521,7 @@ export default function App() {
             }}>
               <img src={a('/assets/profile_picture_landing.jpg')} alt={profile.name} style={{
                 width: '120%', height: 'auto',
-                position: 'relative', top: '-86px', left: '-5px',
+                position: 'relative', top: '-96px', left: '-5px',
               }} />
             </div>
             <div>
@@ -589,14 +589,27 @@ export default function App() {
       <div style={{
         position: 'fixed', bottom: 36, left: 44, zIndex: 20,
         display: 'flex', alignItems: 'center', gap: 28,
-        pointerEvents: 'none',
+        pointerEvents: bioVisible ? 'auto' : 'none',
         opacity: bioVisible ? 1 : 0,
         transition: 'opacity 0.6s ease',
       }}>
-        <div style={{
-          width: 90, height: 90, borderRadius: '50%', overflow: 'hidden',
-          boxShadow: '0 0 0 2px white', flexShrink: 0,
-        }}>
+        <div
+          onClick={goToSplash}
+          title="Back to splash"
+          style={{
+            width: 90, height: 90, borderRadius: '50%', overflow: 'hidden',
+            boxShadow: '0 0 0 2px white', flexShrink: 0,
+            cursor: 'pointer', transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = 'scale(1.08)'
+            e.currentTarget.style.boxShadow = '0 0 0 2px white, 0 0 14px rgba(255,255,255,0.35)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.boxShadow = '0 0 0 2px white'
+          }}
+        >
           <img src={a('/assets/profile_picture_landing.jpg')} alt={profile.name} style={{
             width: '120%', height: 'auto',
             position: 'relative', top: '-50px', left: '-5px',

@@ -62,14 +62,6 @@ export const skills = {
     { label: 'ShadCN',      icon: a('/assets/shadcn.svg') },
     { label: 'AdobeXD',     icon: a('/assets/adobexd.svg') },
   ],
-  Other: [
-    { label: 'Socket.io',   icon: a('/assets/socket.svg') },
-    { label: 'FFmpeg',      icon: a('/assets/ffmpeg.svg') },
-    { label: 'OBS',         icon: a('/assets/obs.svg') },
-    { label: 'Canva',       icon: a('/assets/canva.svg') },
-    { label: 'Notion',      icon: a('/assets/notion.svg') },
-    { label: 'Crow',        icon: a('/assets/crow.svg') },
-  ],
 }
 
 export const experiences = [
@@ -367,7 +359,6 @@ export const projects = {
       subtitle: 'Agentic AI Malware Tracking System',
       badge: 'Hackathon Winner',
       image: a('/assets/projects/useprotechtion.png'),
-      live: 'https://useprotechtion.k-katiyar2006.workers.dev',
       github: 'https://github.com/KushagraKatiyar06/useprotech.tion',
       video: 'https://www.youtube.com/watch?v=DujEn2ixbS0&t=6s',
       stack: [
@@ -425,9 +416,10 @@ export const projects = {
       ],
     },
     {
-      name: 'FloridaFun',
+      name: 'Florida Fun',
       subtitle: 'Amusement Park Mobile & Web Screens',
       image: a('/assets/projects/floridafun.png'),
+      drive: 'https://drive.google.com/drive/folders/1r7JxSu1JuPqJ2nzgcKDRB8hQrKfjRZBe?usp=drive_link',
       stack: [
         { label: 'AdobeXD', icon: a('/assets/adobexd.svg') },
         { label: 'Canva',   icon: a('/assets/canva.svg') },

@@ -1,8 +1,20 @@
 import { useState } from 'react'
 import { experiences } from '../../data/portfolio'
 
+// Tech terms to highlight in bullets (longer first to avoid partial matches)
+const TECH_TERMS = [
+  'Agentic AI', 'GPT-4o', 'GPT-2', 'Next.js 14', 'Next.js 15', 'React 19',
+  'AWS Polly', 'Flux-Schnell', 'Socket.io', 'Gmail API', 'Google Sheets', 'Google Forms',
+  'MediaPipe', 'PostgreSQL', 'TypeScript', 'JavaScript', 'Cloudflare', 'TensorFlow',
+  'Supabase', 'OAuth2', 'Android', 'AdobeXD', 'ShadCN', 'Framer', 'Figma',
+  'Next.js', 'Node.js', 'OpenCV', 'OpenAI', 'Gemini', 'Docker', 'Kotlin',
+  'Python', 'Flask', 'FFmpeg', 'Canva', 'Notion', 'Scrum', 'React',
+  'GCP', 'AWS', 'LLM', 'RAG', 'OBS',
+]
+
 function hl(text) {
-  return text.replace(
+  // Step 1: number highlights
+  let result = text.replace(
     /\$[\d,.]+(?:\s*→\s*\$[\d,.]+)?|\d+[×x]|\d+%|\d[\d,]*\+|\b\d{3,}\b/g,
     m => {
       if (m.startsWith('$') || /\d+[×x]$/.test(m))
@@ -12,6 +24,19 @@ function hl(text) {
       return `<span style="color:#48bcff;text-shadow:0 0 6px rgba(72,188,255,0.4)">${m}</span>`
     }
   )
+  // Step 2: tech term highlights — only in non-span portions
+  const parts = result.split(/(<span\b[^>]*>[\s\S]*?<\/span>)/g)
+  return parts.map((part, i) => {
+    if (i % 2 === 1) return part // already a span
+    for (const term of TECH_TERMS) {
+      const esc = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      part = part.replace(
+        new RegExp(`\\b${esc}\\b`, 'g'),
+        `<span style="color:#48bcff;text-shadow:0 0 6px rgba(72,188,255,0.35);font-style:italic">${term}</span>`
+      )
+    }
+    return part
+  }).join('')
 }
 
 const GROUPS = [

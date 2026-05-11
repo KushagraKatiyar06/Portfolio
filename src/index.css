@@ -31,3 +31,9 @@ body {
 .v1-scroll::-webkit-scrollbar { width:4px; }
 .v1-scroll::-webkit-scrollbar-track { background:transparent; }
 .v1-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:4px; }
+
+@keyframes lightsFlash {
+  0%   { opacity: 0; }
+  20%  { opacity: 0.7; }
+  100% { opacity: 0; }
+}
