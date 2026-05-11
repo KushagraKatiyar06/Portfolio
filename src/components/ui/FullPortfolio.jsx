@@ -46,12 +46,11 @@ function hl(text) {
 
 // ─── Phrase highlights in bio ─────────────────────────────────
 const BIO_PHRASES = [
-  { phrase: 'Computer Science at the University of Florida', color: '#b187ff' },
+  { phrase: 'Computer Science at the University of Florida', color: '#ff9361' },
   { phrase: 'Agentic AI Systems',                           color: '#b187ff' },
   { phrase: 'Full Stack Development',                       color: '#48bcff' },
   { phrase: 'UI/UX Design',                                color: '#ffd166' },
-  { phrase: 'gaming, cars, and Taekwondo',                  color: '#ff9361' },
-  { phrase: '500,000',                                      color: '#ffd166' },
+  { phrase: 'my interests include gaming, cars, and Taekwondo', color: '#7CFC98' },
 ]
 
 function hlBio(text) {

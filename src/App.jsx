@@ -50,7 +50,6 @@ const CAR_CONFIGS = [
   { id: 'm8',      url: m8Url,      pos: [-0.0255, -0.233, -0.2080], rot: [0, -12 * DEG, 0], scale: 9,    label: 'BMW M8'    },
 ]
 
-// --- Debug: floor drag plane ---
 function DebugScene({ carPositions, dragIndex, onCarPositionChange, onDragEnd }) {
   if (dragIndex === null) return null
   const y = carPositions[dragIndex][1]
@@ -75,7 +74,6 @@ function DebugScene({ carPositions, dragIndex, onCarPositionChange, onDragEnd })
   )
 }
 
-// --- Debug: HTML overlay ---
 function DebugOverlay({ debugInfoRef, carPositions, dragIndex }) {
   const posRef    = useRef()
   const targetRef = useRef()
@@ -118,7 +116,6 @@ function DebugOverlay({ debugInfoRef, carPositions, dragIndex }) {
   )
 }
 
-// --- Controls hint (top-left, faded, horizontal) ---
 const HINTS = [
   { key: '← →',          label: 'cycle'        },
   { key: '↑ ↓',          label: 'web view'     },
@@ -152,7 +149,6 @@ function ControlsHint({ visible }) {
   )
 }
 
-// --- Scene camera ---
 function SceneControls({ section, startIntro, introComplete, onIntroComplete, debugInfoRef, debugMode, dragIndex }) {
   const ccRef       = useRef()
   const startedRef  = useRef(false)
@@ -162,14 +158,12 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
   const isInitial    = useRef(true)
   const { camera }   = useThree()
 
-  // Reset when returning to splash
   useEffect(() => {
     if (startIntro) return
     startedRef.current = false
     isInitial.current = true
   }, [startIntro])
 
-  // Snap to about immediately — no intro drop animation
   useEffect(() => {
     if (!startIntro) return
     if (startedRef.current) return
@@ -269,7 +263,6 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
   return <CameraControls ref={ccRef} makeDefault enabled={false} />
 }
 
-// --- App ---
 export default function App() {
   const tooltipRef     = useRef()
   const manualCloseRef = useRef(false)
@@ -295,7 +288,6 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(false)
   const [canLoadCanvas, setCanLoadCanvas] = useState(false)
   
-  // Detect mobile on mount and on resize
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
     checkMobile()
@@ -317,12 +309,10 @@ export default function App() {
 
   const closePortfolio = useCallback(() => {
     setPortfolioOpen(false)
-    // Delay Canvas loading until after portfolio fade (1.4s transition + buffer)
     clearTimeout(canvasLoadTimer.current)
     canvasLoadTimer.current = setTimeout(() => setCanLoadCanvas(true), 1500)
   }, [])
 
-  // Going to splash always resets intro so the camera drop plays again
   const goToSplash = useCallback(() => {
     clearTimeout(canvasLoadTimer.current)
     clearTimeout(splashExitTimer.current)
@@ -363,7 +353,6 @@ export default function App() {
     setPanelMode('hidden')
   }, [])
 
-  // 3D space click: toggle sidebar open / closed
   const handleSceneClick = useCallback(() => {
     if (debugMode || phase !== 'ready' || portfolioOpen) return
     if (panelMode === 'hidden') {
@@ -375,7 +364,6 @@ export default function App() {
     }
   }, [debugMode, phase, portfolioOpen, panelMode])
 
-  // Arrow key + Enter navigation
   useEffect(() => {
     const fn = e => {
       if (phase !== 'ready') return
@@ -399,7 +387,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', fn)
   }, [phase, portfolioOpen, closePortfolio, handleSceneClick])
 
-  // U: toggle controls hint
   useEffect(() => {
     const fn = e => {
       if (e.key !== 'u' && e.key !== 'U') return
@@ -410,16 +397,12 @@ export default function App() {
     return () => window.removeEventListener('keydown', fn)
   }, [phase])
 
-  // Removed: Lights flash on webview open (user preference)
-
-  // Handle webview transitions - unload Canvas when opening webview
   useEffect(() => {
     if (portfolioOpen && canLoadCanvas) {
       setCanLoadCanvas(false)
     }
   }, [portfolioOpen, canLoadCanvas])
 
-  // D: debug mode / reset
   useEffect(() => {
     const fn = e => {
       if (e.key !== 'd' && e.key !== 'D') return
@@ -430,7 +413,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', fn)
   }, [phase, debugMode])
 
-  // Global tooltip
   useEffect(() => {
     const tip = tooltipRef.current
     if (!tip) return
@@ -460,7 +442,6 @@ export default function App() {
 
   const handleDragEnd = useCallback(() => setDragIndex(null), [])
 
-  // Scroll wheel: Y adjustment for dragged car
   useEffect(() => {
     if (dragIndex === null) return
     const fn = e => {
@@ -479,7 +460,6 @@ export default function App() {
   const splashDone = phase !== 'splash'
   const bioVisible = phase === 'ready' && panelMode === 'hidden'
   
-  // On mobile, open portfolio immediately and hide 3D
   useEffect(() => {
     if (isMobile) {
       setPortfolioOpen(true)
@@ -754,7 +734,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* -- Left-edge social column -- */}
       <div style={{
         position: 'fixed', left: 20, top: '50%', transform: 'translateY(-50%)',
         zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
@@ -776,7 +755,6 @@ export default function App() {
         ))}
       </div>
 
-      {/* -- Side panel -- */}
       {splashDone && (
         <SidePanel
           section={section}
@@ -797,7 +775,6 @@ export default function App() {
         onLogoClick={goToSplash}
       />
 
-      {/* -- Global tooltip -- */}
       <div
         ref={tooltipRef}
         style={{

@@ -1,8 +1,11 @@
 # Kushagra Katiyar | Portfolio.v2
 
-A personal portfolio website built inside an interactive 3D garage — featuring two real car models (Mazda RX-7 FD and Porsche Carrera GT), a cinematic camera system that pans between sections, and a fully animated sidebar with my work history, projects, and skills. The garage environment is modeled after Need for Speed 2015.
+A personal portfolio website built inside an interactive 3D garage — featuring my dream cars, a cinematic camera system that pans between sections, and a fully animated sidebar with my work history, projects, and skills. The environment is a nod to Need for Speed 2015.
 
 Live site: [kushagrakatiyar06.github.io/Portfolio-v2](https://kushagrakatiyar06.github.io/Portfolio-v2/)
+
+I first worked on Portfolio V1 as a way to learn HTML,CSS,JS and it heavily inspires the design for this new portfolio as well.
+Check it out: [kushagrakatiyar06.github.io/Portfolio-v1](https://kushagrakatiyar06.github.io/Portfolio-v1/)
 
 ---
 
@@ -10,7 +13,7 @@ Live site: [kushagrakatiyar06.github.io/Portfolio-v2](https://kushagrakatiyar06.
 
 **Frontend:** React 18, Vite
 **3D:** Three.js, React Three Fiber, React Three Drei
-**Models:** Custom .glb models (garage, RX-7 FD, Carrera GT)
+**Models:** Custom .glb models 
 **Deployment:** GitHub Actions → GitHub Pages
 
 ---

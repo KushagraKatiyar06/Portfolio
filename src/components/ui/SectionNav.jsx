@@ -34,7 +34,6 @@ export default function SectionNav({ section, onSection, disabled, dimmed, onLog
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      {/* Profile image — click to return to splash (V1: back to top) */}
       <div
         onClick={() => onLogoClick?.()}
         title="Back to top"
@@ -59,7 +58,6 @@ export default function SectionNav({ section, onSection, disabled, dimmed, onLog
         />
       </div>
 
-      {/* Nav links */}
       <ul style={{
         display: 'flex', flexDirection: 'row', listStyle: 'none',
         gap: '2rem', margin: 0, padding: 0,
@@ -99,7 +97,6 @@ export default function SectionNav({ section, onSection, disabled, dimmed, onLog
                 }}
               >
                 {label}
-                {/* Underline indicator */}
                 <span style={{
                   position: 'absolute', bottom: -5, left: 0,
                   width: active ? '100%' : '0%', height: 2,

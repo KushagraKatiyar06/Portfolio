@@ -8,7 +8,6 @@ export default function SceneFitter({ garageUrl, carUrl, carId, onFitGarage, onF
   const { scene: garageScene } = useGLTF(garageUrl)
   const { scene: carScene } = useGLTF(carUrl)
 
-  // Run once on mount — positions camera to frame the garage
   useEffect(() => {
     const garageBox = new THREE.Box3().setFromObject(garageScene)
     const garageSize = new THREE.Vector3()
@@ -37,7 +36,6 @@ export default function SceneFitter({ garageUrl, carUrl, carId, onFitGarage, onF
     onFitGarage({ size: garageSize, center: garageCenter, box: garageBox })
   }, [garageScene]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Re-runs whenever the selected car changes
   useEffect(() => {
     const garageBox = new THREE.Box3().setFromObject(garageScene)
     const garageSize = new THREE.Vector3()

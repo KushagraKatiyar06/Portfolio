@@ -1,8 +1,6 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
 
-// A radial-gradient plane that always renders on top of floor geometry.
-// depthTest:false + depthWrite:false means the floor can never hide it.
 export default function BlobShadow({ position, width = 0.3, length = 0.18, opacity = 0.55, yRotation = 0 }) {
   const texture = useMemo(() => {
     const size = 128

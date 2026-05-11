@@ -7,7 +7,6 @@ export default function ProfilePanel({ visible, onClose }) {
   const panelRef = useRef()
   const [mounted, setMounted] = useState(false)
 
-  // trigger enter animation after mount
   useEffect(() => {
     if (visible) {
       requestAnimationFrame(() => setMounted(true))
@@ -16,7 +15,6 @@ export default function ProfilePanel({ visible, onClose }) {
     }
   }, [visible])
 
-  // ESC to close
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -27,7 +25,6 @@ export default function ProfilePanel({ visible, onClose }) {
 
   return (
     <>
-      {/* backdrop dims the 3D scene */}
       <div
         onClick={onClose}
         style={{
@@ -38,7 +35,6 @@ export default function ProfilePanel({ visible, onClose }) {
         }}
       />
 
-      {/* sliding panel */}
       <div
         ref={panelRef}
         style={{
@@ -58,7 +54,6 @@ export default function ProfilePanel({ visible, onClose }) {
           scrollbarColor: 'rgba(255,255,255,0.1) transparent',
         }}
       >
-        {/* close hint */}
         <button
           onClick={onClose}
           style={{
@@ -128,7 +123,7 @@ export default function ProfilePanel({ visible, onClose }) {
             </div>
           </div>
 
-          {/* divider */}
+
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 36 }} />
 
           {/* ── Bio ── */}

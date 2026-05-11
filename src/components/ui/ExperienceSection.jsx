@@ -43,15 +43,12 @@ const GROUPS = [
   { key: 'leadership',      label: 'Leadership',             accent: '#b187ff' },
 ]
 
-// Sorting function: PRESENT at top, then by start date (most recent first), then prefer technical
 function sortExperiences(items) {
   return items.sort((a, b) => {
     const aIsPresent = a.duration.includes('Present')
     const bIsPresent = b.duration.includes('Present')
     
-    // Both present or both not present
     if (aIsPresent === bIsPresent) {
-      // Extract start month/year from duration
       const getStartDate = (duration) => {
         const [start] = duration.split(' – ')
         const months = { January: 1, February: 2, March: 3, April: 4, May: 5, June: 6, July: 7, August: 8, September: 9, October: 10, November: 11, December: 12 }
@@ -62,17 +59,14 @@ function sortExperiences(items) {
       const dateA = getStartDate(a.duration)
       const dateB = getStartDate(b.duration)
       
-      // More recent start date first
       if (dateA.getTime() !== dateB.getTime()) {
         return dateB.getTime() - dateA.getTime()
       }
       
-      // If same date, prefer technical roles (experience) over others
       const typeOrder = { experience: 0, leadership: 1, extracurricular: 2 }
       return (typeOrder[a.type] ?? 3) - (typeOrder[b.type] ?? 3)
     }
     
-    // Present comes before non-present
     return aIsPresent ? -1 : 1
   })
 }

@@ -5,12 +5,11 @@ import { profile, social, skills } from '../../data/portfolio'
 import { a } from '../../utils/asset'
 
 const BIO_PHRASES = [
-  { phrase: 'Computer Science at the University of Florida', color: '#b187ff' },
+  { phrase: 'Computer Science at the University of Florida', color: '#ff9361' },
   { phrase: 'Agentic AI Systems',                           color: '#b187ff' },
   { phrase: 'Full Stack Development',                       color: '#48bcff' },
   { phrase: 'UI/UX Design',                                color: '#ffd166' },
-  { phrase: 'gaming, cars, and Taekwondo',                  color: '#ff9361' },
-  { phrase: '500,000',                                      color: '#ffd166' },
+  { phrase: 'my interests include gaming, cars, and Taekwondo', color: '#7CFC98' },
 ]
 
 function hlBio(text) {
@@ -67,7 +66,6 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
   useEffect(() => {
     if (prevRendered.current !== null && prevRendered.current !== rendered) {
       setTransKey(k => k + 1)
-      // Trigger flash on section change
       flashKey.current++
       clearTimeout(flashTimer.current)
       setFlashing(false)
@@ -80,7 +78,6 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
   const open  = panelMode !== 'hidden' && (section !== 'about' || showAbout)
   const width = panelMode === 'expanded' ? WIDTH_EXPANDED : WIDTH_NORMAL
 
-  // Drag-to-close
   const handleDragStart = e => {
     if (!open) return
     dragState.current = { active: true, startX: e.clientX }
@@ -152,14 +149,12 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
         </svg>
       </button>
 
-      {/* Panel body */}
       <div style={{
         position: 'absolute', inset: 0,
         borderLeft: '1px solid rgba(255,255,255,0.08)',
         display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
       }}>
-        {/* Lights flash on section change */}
         {flashing && (
           <div key={flashKey.current} style={{
             position: 'absolute', inset: 0, zIndex: 12,
@@ -171,7 +166,6 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
           }} />
         )}
 
-        {/* Background layers */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
           <div style={{
             position: 'absolute', inset: 0,

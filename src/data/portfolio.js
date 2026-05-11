@@ -85,7 +85,7 @@ export const experiences = [
   {
     type: 'extracurricular',
     org: 'Swamp Records',
-    role: 'UI/UX Designer',
+    role: 'Software Engineer',
     duration: 'January 2026 – April 2026',
     location: 'Gainesville, Florida',
     logo: a('/assets/orgs/swamprecords.jpg'),
