@@ -7,6 +7,8 @@ import Car from './components/Car'
 import BlobShadow from './components/BlobShadow'
 import FullPortfolio from './components/ui/FullPortfolio'
 import SidePanel from './components/ui/SidePanel'
+import Rx7CursorFollower from './components/ui/Rx7CursorFollower'
+import SplashParticles from './components/ui/SplashParticles'
 
 import { profile, social } from './data/portfolio'
 import { a } from './utils/asset'
@@ -23,7 +25,7 @@ useGLTF.preload(m8Url)
 
 const DEG = Math.PI / 180
 
-const CAM_START = [-0.6946, 0.0169, 0.7204]
+const CAM_START = [-0.7412, -0.1175, 0.7313]
 
 const SECTION_CAMS = {
   about: {
@@ -41,7 +43,6 @@ const SECTION_CAMS = {
 }
 
 const SECTIONS = ['about', 'experience', 'projects']
-const INTRO_MS = 2000
 
 const CAR_CONFIGS = [
   { id: 'carrera', url: carreraUrl, pos: [-0.47,  -0.2335,  0.45],   rot: [0, 106 * DEG, 0], scale: 0.09, label: 'Carrera GT' },
@@ -119,10 +120,10 @@ function DebugOverlay({ debugInfoRef, carPositions, dragIndex }) {
 
 // --- Controls hint (top-left, faded, horizontal) ---
 const HINTS = [
-  { key: '← →',  label: 'cycle'        },
-  { key: '↑ ↓',  label: 'web view'     },
-  { key: 'click', label: 'open details' },
-  { key: 'U',     label: 'hide UI'      },
+  { key: '← →',          label: 'cycle'        },
+  { key: '↑ ↓',          label: 'web view'     },
+  { key: 'enter / click', label: 'open details' },
+  { key: 'U',             label: 'hide controls' },
 ]
 
 function ControlsHint({ visible }) {
@@ -155,33 +156,38 @@ function ControlsHint({ visible }) {
 function SceneControls({ section, startIntro, introComplete, onIntroComplete, debugInfoRef, debugMode, dragIndex }) {
   const ccRef       = useRef()
   const startedRef  = useRef(false)
-  const prevSection = useRef('about')
-  const trans       = useRef(null)
-  const curTarget   = useRef(new Vector3(...SECTION_CAMS.about.target))
-  const { camera }  = useThree()
+  const prevSection  = useRef('about')
+  const trans        = useRef(null)
+  const curTarget    = useRef(new Vector3(...SECTION_CAMS.about.target))
+  const isInitial    = useRef(true)
+  const { camera }   = useThree()
 
-  // Reset startedRef whenever we return to splash so the drop replays each entry
+  // Reset when returning to splash
   useEffect(() => {
     if (startIntro) return
     startedRef.current = false
+    isInitial.current = true
   }, [startIntro])
 
+  // Snap to about immediately — no intro drop animation
   useEffect(() => {
     if (!startIntro) return
-    if (startedRef.current) return   // already animating or done — section effect handles camera
+    if (startedRef.current) return
     startedRef.current = true
     const { pos: rp, target: rt } = SECTION_CAMS.about
-    trans.current = {
-      sp: [...CAM_START], st: [...rt],
-      ep: [...rp],        et: [...rt],
-      elapsed: 0, dur: INTRO_MS / 1000,
-      arc: 0, isIntro: true,
-      onDone: onIntroComplete,
-    }
-  }, [startIntro, onIntroComplete])
+    camera.position.set(rp[0], rp[1], rp[2])
+    curTarget.current.set(rt[0], rt[1], rt[2])
+    camera.lookAt(rt[0], rt[1], rt[2])
+    onIntroComplete()
+  }, [startIntro, onIntroComplete, camera])
 
   useEffect(() => {
     if (!introComplete) return
+    if (isInitial.current) {
+      isInitial.current = false
+      prevSection.current = section
+      return
+    }
     const { pos, target } = SECTION_CAMS[section]
     const ct = curTarget.current
     const needsArc = section === 'about' || prevSection.current === 'about'
@@ -246,8 +252,8 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
       return
     }
 
-    const sx = (Math.sin(time * 0.71) * 0.55 + Math.sin(time * 2.13) * 0.45) * 0.0028
-    const sy = (Math.sin(time * 0.53) * 0.60 + Math.sin(time * 1.87) * 0.40) * 0.0018
+    const sx = (Math.sin(time * 0.71) * 0.55 + Math.sin(time * 2.13) * 0.45) * 0.0055
+    const sy = (Math.sin(time * 0.53) * 0.60 + Math.sin(time * 1.87) * 0.40) * 0.0035
 
     curTarget.current.set(lx, ly, lz)
     camera.position.set(px + sx, py + sy, pz)
@@ -277,7 +283,14 @@ export default function App() {
   const [debugMode,     setDebugMode]     = useState(false)
   const [dragIndex,     setDragIndex]     = useState(null)
   const [carPositions,  setCarPositions]  = useState(CAR_CONFIGS.map(c => [...c.pos]))
-  const [showControls,  setShowControls]  = useState(true)
+  const [showControls,    setShowControls]    = useState(true)
+  const [portfolioFlashing, setPortfolioFlashing] = useState(false)
+  const portfolioFlashKey   = useRef(0)
+  const portfolioFlashTimer = useRef(null)
+
+  const [splashFlashing,  setSplashFlashing]  = useState(false)
+  const splashFlashKey  = useRef(0)
+  const splashExitTimer = useRef(null)
 
   const onIntroComplete = useCallback(() => {
     setIntroComplete(true)
@@ -301,6 +314,18 @@ export default function App() {
     setPortfolioOpen(false)
     setIntroComplete(false)
   }, [])
+
+  const exitSplash = useCallback(() => {
+    if (phase !== 'splash') return
+    splashFlashKey.current++
+    setSplashFlashing(false)
+    requestAnimationFrame(() => requestAnimationFrame(() => setSplashFlashing(true)))
+    clearTimeout(splashExitTimer.current)
+    splashExitTimer.current = setTimeout(() => {
+      setSplashFlashing(false)
+      setPhase('intro')
+    }, 400)
+  }, [phase])
 
   const cycleMode = useCallback(() => {
     setPanelMode(m => {
@@ -328,7 +353,7 @@ export default function App() {
     }
   }, [debugMode, phase, portfolioOpen, panelMode])
 
-  // Arrow key navigation
+  // Arrow key + Enter navigation
   useEffect(() => {
     const fn = e => {
       if (phase !== 'ready') return
@@ -344,11 +369,13 @@ export default function App() {
         openPortfolio()
       } else if (e.key === 'ArrowDown') {
         closePortfolio()
+      } else if (e.key === 'Enter') {
+        handleSceneClick()
       }
     }
     window.addEventListener('keydown', fn)
     return () => window.removeEventListener('keydown', fn)
-  }, [phase, portfolioOpen, closePortfolio])
+  }, [phase, portfolioOpen, closePortfolio, handleSceneClick])
 
   // U: toggle controls hint
   useEffect(() => {
@@ -360,6 +387,17 @@ export default function App() {
     window.addEventListener('keydown', fn)
     return () => window.removeEventListener('keydown', fn)
   }, [phase])
+
+  // Lights flash when web view rises
+  useEffect(() => {
+    if (!portfolioOpen) return
+    portfolioFlashKey.current++
+    clearTimeout(portfolioFlashTimer.current)
+    setPortfolioFlashing(false)
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => setPortfolioFlashing(true)))
+    portfolioFlashTimer.current = setTimeout(() => setPortfolioFlashing(false), 1600)
+    return () => { cancelAnimationFrame(raf); clearTimeout(portfolioFlashTimer.current) }
+  }, [portfolioOpen])
 
   // D: debug mode / reset
   useEffect(() => {
@@ -485,12 +523,33 @@ export default function App() {
         background: 'radial-gradient(ellipse at 40% 60%, transparent 22%, rgba(0,0,0,0.78) 100%)',
       }} />
 
-      {/* -- Splash overlay: rx7 background fades to reveal 3D scene -- */}
+      {/* -- Ambient landing lights — subtle always-on glow -- */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 11, pointerEvents: 'none',
+        backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+        backgroundSize: 'cover', backgroundPosition: 'center',
+        filter: 'brightness(2)', mixBlendMode: 'screen',
+        opacity: introComplete && !portfolioOpen ? 0.07 : 0,
+        transition: 'opacity 2s ease',
+      }} />
+
+      {/* -- Portfolio open lights flash (zIndex between sidebar and portfolio) -- */}
+      {portfolioFlashing && (
+        <div key={portfolioFlashKey.current} style={{
+          position: 'fixed', inset: 0, zIndex: 55, pointerEvents: 'none',
+          backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          mixBlendMode: 'screen', filter: 'brightness(2)',
+          animation: 'lightsFlash 1.6s ease-out forwards',
+        }} />
+      )}
+
+      {/* -- Splash overlay: fades out to reveal 3D scene -- */}
       <div style={{
         position: 'fixed', inset: 0, zIndex: 50,
         pointerEvents: splashDone ? 'none' : 'auto',
         opacity: splashDone ? 0 : 1,
-        transition: 'opacity 1.1s ease',
+        transition: 'opacity 1.2s ease',
       }}>
         {/* rx7 photo background */}
         <div style={{
@@ -498,16 +557,29 @@ export default function App() {
           backgroundImage: `url(${a('/assets/rx7_background.jpg')})`,
           backgroundSize: 'cover', backgroundPosition: 'center',
         }} />
-        {/* dark overlay so text reads cleanly */}
+        {/* dark overlay */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.52)' }} />
-        {/* red glow lights */}
+        {/* ambient red glow */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
           backgroundSize: 'cover', backgroundPosition: 'center',
-          filter: 'brightness(2)',
-          opacity: 0.32, mixBlendMode: 'screen',
+          filter: 'brightness(2)', opacity: 0.22, mixBlendMode: 'screen',
+          pointerEvents: 'none',
         }} />
+        {/* exit flash */}
+        {splashFlashing && (
+          <div key={splashFlashKey.current} style={{
+            position: 'absolute', inset: 0, zIndex: 3,
+            backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            filter: 'brightness(2)', mixBlendMode: 'screen',
+            animation: 'lightsFlash 1.4s ease-out forwards',
+            pointerEvents: 'none',
+          }} />
+        )}
+        {/* particles */}
+        <SplashParticles />
 
         {/* Hero — left-aligned, v1 style */}
         <div style={{
@@ -521,7 +593,7 @@ export default function App() {
             }}>
               <img src={a('/assets/profile_picture_landing.jpg')} alt={profile.name} style={{
                 width: '120%', height: 'auto',
-                position: 'relative', top: '-96px', left: '-5px',
+                position: 'relative', top: '-106px', left: '-5px',
               }} />
             </div>
             <div>
@@ -558,32 +630,36 @@ export default function App() {
           </div>
         </div>
 
-        {/* Continue prompt */}
+        {/* Arrow only — no text */}
         <div
-          onClick={() => setPhase('intro')}
+          onClick={exitSplash}
           style={{
             position: 'absolute', bottom: 60, left: '50%', transform: 'translateX(-50%)',
-            zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+            zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center',
             cursor: 'pointer', animation: 'pulse 2s ease-in-out infinite',
           }}
         >
-          <span style={{
-            fontFamily: 'Imprima, sans-serif', fontSize: '0.85rem',
-            letterSpacing: '0.22em', textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.65)',
-          }}>press any key to continue</span>
-          <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
-            <path d="M2 2l8 8 8-8" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="28" height="17" viewBox="0 0 28 17" fill="none">
+            <path d="M2 2l12 13 12-13" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' }}
+            />
           </svg>
         </div>
       </div>
 
-      {!splashDone && <SplashKeyListener onEnter={() => setPhase('intro')} />}
+      {!splashDone && <SplashKeyListener onEnter={exitSplash} />}
 
       {/* -- Controls hint (top-left) -- */}
       {splashDone && !portfolioOpen && (
         <ControlsHint visible={showControls} />
       )}
+
+
+
+      {/* -- RX7 cursor follower -- */}
+      <Rx7CursorFollower
+        visible={phase === 'splash'}
+      />
 
       {/* -- Bottom-left identity -- visible only when sidebar is hidden -- */}
       <div style={{
@@ -663,11 +739,11 @@ export default function App() {
             style={{ display: 'inline-flex' }}>
             <img src={icon} alt={label} style={{
               width: 26, height: 26,
-              filter: 'brightness(0) invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.4))',
-              opacity: 1, transition: 'filter 0.2s',
+              filter: 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.75))',
+              opacity: 1, transition: 'filter 0.3s ease',
             }}
-              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 12px rgba(255,255,255,1))' }}
-              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.4))' }}
+              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 18px rgba(255,255,255,1))' }}
+              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.75))' }}
             />
           </a>
         ))}

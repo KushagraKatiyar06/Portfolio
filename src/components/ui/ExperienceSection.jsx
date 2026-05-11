@@ -1,33 +1,31 @@
 import { useState } from 'react'
 import { experiences } from '../../data/portfolio'
 
-// Tech terms to highlight in bullets (longer first to avoid partial matches)
 const TECH_TERMS = [
   'Agentic AI', 'GPT-4o', 'GPT-2', 'Next.js 14', 'Next.js 15', 'React 19',
   'AWS Polly', 'Flux-Schnell', 'Socket.io', 'Gmail API', 'Google Sheets', 'Google Forms',
-  'MediaPipe', 'PostgreSQL', 'TypeScript', 'JavaScript', 'Cloudflare', 'TensorFlow',
-  'Supabase', 'OAuth2', 'Android', 'AdobeXD', 'ShadCN', 'Framer', 'Figma',
-  'Next.js', 'Node.js', 'OpenCV', 'OpenAI', 'Gemini', 'Docker', 'Kotlin',
+  'Google Cloud', 'Google Service Accounts', 'Launch Library 2',
+  'DaVinci Resolve', 'MediaPipe', 'PostgreSQL', 'TypeScript', 'JavaScript',
+  'Cloudflare', 'TensorFlow', 'Supabase', 'OAuth2', 'Android', 'AdobeXD',
+  'ShadCN', 'Framer', 'Figma', 'Next.js', 'Node.js', 'OpenCV', 'OpenAI',
+  'Gemini', 'Docker', 'Kotlin', 'Angular', 'Ionic', 'Pydantic',
   'Python', 'Flask', 'FFmpeg', 'Canva', 'Notion', 'Scrum', 'React',
   'GCP', 'AWS', 'LLM', 'RAG', 'OBS',
 ]
 
 function hl(text) {
-  // Step 1: number highlights
   let result = text.replace(
-    /\$[\d,.]+(?:\s*→\s*\$[\d,.]+)?|\d+[×x]|\d+%|\d[\d,]*\+|\b\d{3,}\b/g,
+    /\$[\d,]+(?:\s*→\s*\$[\d,]+)?|\b\d[\d,]*[×xX%+]|\b\d[\d,]*\b/g,
     m => {
-      if (m.startsWith('$') || /\d+[×x]$/.test(m))
-        return `<span style="color:#ff9361;text-shadow:0 0 6px rgba(255,147,97,0.4)">${m}</span>`
+      const clean = m.replace(/,/g, '')
       if (m.endsWith('%'))
-        return `<span style="color:#ffd166;text-shadow:0 0 5px rgba(255,209,102,0.4)">${m}</span>`
-      return `<span style="color:#48bcff;text-shadow:0 0 6px rgba(72,188,255,0.4)">${m}</span>`
+        return `<span style="color:#ffd166;text-shadow:0 0 5px rgba(255,209,102,0.4)">${clean}</span>`
+      return `<span style="color:#ff9361;text-shadow:0 0 6px rgba(255,147,97,0.4)">${clean}</span>`
     }
   )
-  // Step 2: tech term highlights — only in non-span portions
   const parts = result.split(/(<span\b[^>]*>[\s\S]*?<\/span>)/g)
   return parts.map((part, i) => {
-    if (i % 2 === 1) return part // already a span
+    if (i % 2 === 1) return part
     for (const term of TECH_TERMS) {
       const esc = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       part = part.replace(
@@ -40,22 +38,22 @@ function hl(text) {
 }
 
 const GROUPS = [
-  { key: 'experience',  label: 'Work Experience' },
-  { key: 'leadership',  label: 'Technical Leadership' },
-  { key: 'involvement', label: 'Campus Involvement' },
+  { key: 'experience',    label: 'Professional Experience', accent: '#48bcff' },
+  { key: 'leadership',    label: 'Leadership',              accent: '#b187ff' },
+  { key: 'extracurricular', label: 'Extracurriculars',      accent: '#ffd166' },
 ]
 
 export default function ExperienceSection({ expanded = false }) {
   return (
-    <div style={{ padding: '28px 20px 48px' }}>
-      {GROUPS.map(({ key, label }) => {
+    <div style={{ padding: '20px 18px 48px' }}>
+      {GROUPS.map(({ key, label, accent }) => {
         const items = experiences.filter(e => e.type === key)
         if (!items.length) return null
         return (
-          <div key={key} style={{ marginBottom: 36 }}>
-            <GroupHeader label={label} />
+          <div key={key} style={{ marginBottom: 32 }}>
+            <GroupHeader label={label} accent={accent} />
             {items.map((item, i) => (
-              <ExperienceCard key={i} item={item} forceExpanded={expanded} />
+              <ExperienceCard key={i} item={item} accent={accent} forceExpanded={expanded} />
             ))}
           </div>
         )
@@ -64,40 +62,40 @@ export default function ExperienceSection({ expanded = false }) {
   )
 }
 
-function GroupHeader({ label }) {
+function GroupHeader({ label, accent }) {
   return (
     <div style={{
       fontFamily: 'Imprima, sans-serif',
-      fontSize: 12, letterSpacing: '0.24em',
+      fontSize: 11, letterSpacing: '0.24em',
       textTransform: 'uppercase',
-      color: '#b187ff',
-      textShadow: '0 0 8px rgba(177,135,255,0.5)',
-      marginBottom: 12, paddingBottom: 8,
-      borderBottom: '1px solid rgba(177,135,255,0.15)',
+      color: accent,
+      textShadow: `0 0 8px ${accent}88`,
+      marginBottom: 10, paddingBottom: 7,
+      borderBottom: `1px solid ${accent}33`,
     }}>
       {label}
     </div>
   )
 }
 
-function ExperienceCard({ item, forceExpanded }) {
+function ExperienceCard({ item, accent, forceExpanded }) {
   const [expanded, setExpanded] = useState(false)
   const showAll = forceExpanded || expanded
   const bullets = showAll ? item.bullets : item.bullets.slice(0, 2)
 
   return (
     <div style={{
-      marginBottom: 14,
-      padding: '14px 14px',
-      background: 'rgba(255,255,255,0.03)',
+      marginBottom: 12,
+      padding: '13px 13px',
+      background: 'rgba(255,255,255,0.025)',
       border: '1px solid rgba(255,255,255,0.07)',
-      borderLeft: '2px solid rgba(177,135,255,0.4)',
+      borderLeft: `2px solid ${accent}66`,
+      transition: 'border-color 0.2s',
     }}>
-      {/* Logo + header */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
+      <div style={{ display: 'flex', gap: 11, marginBottom: 9 }}>
         {item.logo && (
           <div style={{
-            width: 40, height: 40, flexShrink: 0,
+            width: 38, height: 38, flexShrink: 0,
             border: '1px solid rgba(255,255,255,0.1)',
             background: 'rgba(255,255,255,0.04)',
             overflow: 'hidden', display: 'flex',
@@ -109,58 +107,53 @@ function ExperienceCard({ item, forceExpanded }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontFamily: 'Imprima, sans-serif',
-            fontSize: '0.95rem', color: '#fff',
+            fontSize: '0.93rem', color: '#fff',
             letterSpacing: '0.01em', lineHeight: 1.3, marginBottom: 2,
           }}>
             {item.role}
           </div>
           <div style={{
             fontFamily: 'Imprima, sans-serif',
-            fontSize: '0.78rem', color: 'rgba(255,255,255,0.38)',
-            letterSpacing: '0.03em',
+            fontSize: '0.75rem', letterSpacing: '0.03em',
           }}>
-            {item.org}&nbsp;·&nbsp;{item.duration}
+            <span style={{ color: accent }}>{item.org}</span>
+            <span style={{ color: 'rgba(255,255,255,0.35)' }}>&nbsp;·&nbsp;{item.duration}</span>
           </div>
         </div>
       </div>
 
-      {/* Bullets */}
       <ul style={{
-        margin: '0 0 8px 0', padding: '0 0 0 14px',
+        margin: '0 0 7px 0', padding: '0 0 0 14px',
         fontFamily: 'Imprima, sans-serif',
-        fontSize: '0.82rem', color: 'rgba(255,255,255,0.62)',
-        lineHeight: 1.65, listStyle: 'disc',
+        fontSize: '0.8rem', color: 'rgba(255,255,255,0.62)',
+        lineHeight: 1.7, listStyle: 'disc',
       }}>
         {bullets.map((b, i) => (
           <li key={i} style={{ marginBottom: 2 }} dangerouslySetInnerHTML={{ __html: hl(b) }} />
         ))}
       </ul>
 
-      {/* Expand toggle — hidden when forceExpanded */}
       {item.bullets.length > 2 && !forceExpanded && (
-        <button
-          onClick={() => setExpanded(e => !e)}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontFamily: 'Imprima, sans-serif',
-            fontSize: '0.7rem', letterSpacing: '0.1em',
-            color: 'rgba(72,188,255,0.7)',
-            padding: 0, marginBottom: 8,
-            textTransform: 'uppercase',
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = '#48bcff'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(72,188,255,0.7)'}
+        <button onClick={() => setExpanded(e => !e)} style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          fontFamily: 'Imprima, sans-serif',
+          fontSize: '0.68rem', letterSpacing: '0.1em',
+          color: `${accent}bb`,
+          padding: 0, marginBottom: 7,
+          textTransform: 'uppercase',
+        }}
+          onMouseEnter={e => e.currentTarget.style.color = accent}
+          onMouseLeave={e => e.currentTarget.style.color = `${accent}bb`}
         >
           {expanded ? '▲ less' : `▼ +${item.bullets.length - 2} more`}
         </button>
       )}
 
-      {/* Stack — v1-icon style */}
-      {item.stack.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 4 }}>
+      {item.stack?.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 9, marginTop: 3 }}>
           {item.stack.map(({ label, icon }) => (
             <div key={label} className="v1-icon" data-tip={label}>
-              <img src={icon} alt={label} style={{ width: 22, height: 22, objectFit: 'contain' }} />
+              <img src={icon} alt={label} style={{ width: 20, height: 20, objectFit: 'contain' }} />
             </div>
           ))}
         </div>

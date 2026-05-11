@@ -4,6 +4,37 @@ import ProjectsSection from './ProjectsSection'
 import { profile, social, skills } from '../../data/portfolio'
 import { a } from '../../utils/asset'
 
+const BIO_PHRASES = [
+  { phrase: 'Computer Science at the University of Florida', color: '#b187ff' },
+  { phrase: 'Agentic AI Systems',                           color: '#b187ff' },
+  { phrase: 'Full Stack Development',                       color: '#48bcff' },
+  { phrase: 'UI/UX Design',                                color: '#ffd166' },
+  { phrase: 'gaming, cars, and Taekwondo',                  color: '#ff9361' },
+  { phrase: '500,000',                                      color: '#ffd166' },
+]
+
+function hlBio(text) {
+  let parts = [{ text, hi: false }]
+  for (const { phrase, color } of BIO_PHRASES) {
+    const next = []
+    for (const p of parts) {
+      if (p.hi) { next.push(p); continue }
+      const idx = p.text.indexOf(phrase)
+      if (idx === -1) { next.push(p); continue }
+      if (idx > 0) next.push({ text: p.text.slice(0, idx), hi: false })
+      next.push({ text: phrase, hi: true, color })
+      const rest = p.text.slice(idx + phrase.length)
+      if (rest) next.push({ text: rest, hi: false })
+    }
+    parts = next
+  }
+  return parts.map(p =>
+    p.hi
+      ? `<span style="color:${p.color};text-shadow:0 0 8px ${p.color}88">${p.text}</span>`
+      : p.text
+  ).join('')
+}
+
 const SECTION_ACCENT = {
   about:      '#fff',
   experience: '#b187ff',
@@ -20,13 +51,22 @@ const NAV_ITEMS = [
 ]
 
 export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose, onLogoClick }) {
-  const [rendered, setRendered] = useState(section)
-  const outerRef  = useRef()
-  const dragState = useRef({ active: false, startX: 0 })
+  const [rendered,      setRendered]  = useState(section)
+  const [transitionKey, setTransKey]  = useState(0)
+  const prevRendered    = useRef(null)
+  const outerRef        = useRef()
+  const dragState       = useRef({ active: false, startX: 0 })
 
   useEffect(() => {
     if (section !== 'about' || showAbout) setRendered(section)
   }, [section, showAbout])
+
+  useEffect(() => {
+    if (prevRendered.current !== null && prevRendered.current !== rendered) {
+      setTransKey(k => k + 1)
+    }
+    prevRendered.current = rendered
+  }, [rendered])
 
   const open  = panelMode !== 'hidden' && (section !== 'about' || showAbout)
   const width = panelMode === 'expanded' ? WIDTH_EXPANDED : WIDTH_NORMAL
@@ -182,9 +222,11 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255,255,255,0.08) transparent',
         }}>
-          {rendered === 'about'      && <AboutSection onLogoClick={onLogoClick} resume={profile.resume} />}
-          {rendered === 'experience' && <ExperienceSection expanded={panelMode === 'expanded'} />}
-          {rendered === 'projects'   && <ProjectsSection expanded={panelMode === 'expanded'} />}
+          <div key={transitionKey} style={{ animation: transitionKey > 0 ? 'tabFadeIn 0.35s ease-out forwards' : undefined }}>
+            {rendered === 'about'      && <AboutSection onLogoClick={onLogoClick} resume={profile.resume} />}
+            {rendered === 'experience' && <ExperienceSection expanded={panelMode === 'expanded'} />}
+            {rendered === 'projects'   && <ProjectsSection expanded={panelMode === 'expanded'} />}
+          </div>
         </div>
       </div>
     </div>
@@ -310,15 +352,16 @@ function AboutSection({ onLogoClick, resume }) {
       </a>
 
       {/* Bio */}
-      <div style={{
-        fontFamily: 'Imprima, sans-serif',
-        fontSize: '0.78rem', color: 'rgba(255,255,255,0.62)',
-        lineHeight: 1.75, marginBottom: 26,
-        borderLeft: '2px solid rgba(255,255,255,0.12)',
-        paddingLeft: 12,
-      }}>
-        {profile.bio}
-      </div>
+      <div
+        style={{
+          fontFamily: 'Imprima, sans-serif',
+          fontSize: '0.78rem', color: 'rgba(255,255,255,0.62)',
+          lineHeight: 1.75, marginBottom: 26,
+          borderLeft: '2px solid rgba(255,255,255,0.12)',
+          paddingLeft: 12,
+        }}
+        dangerouslySetInnerHTML={{ __html: hlBio(profile.bio) }}
+      />
 
       {/* Tech stack icon grid */}
       {Object.entries(skills).map(([cat, items]) => (
