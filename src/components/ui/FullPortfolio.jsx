@@ -28,7 +28,13 @@ const PROJ_GROUPS = [
 ]
 
 // ─── Main ─────────────────────────────────────────────────────
-export default function FullPortfolio({ visible, onClose }) {
+const NAV_SECTIONS = [
+  { id: 'about',      label: 'About'      },
+  { id: 'experience', label: 'Experience' },
+  { id: 'projects',   label: 'Projects'   },
+]
+
+export default function FullPortfolio({ visible, onClose, section, onSection, onLogoClick }) {
   const [inDom,   setInDom]   = useState(false)
   const [show,    setShow]    = useState(false)
   const [mainTab, setMainTab] = useState('bio')
@@ -81,12 +87,19 @@ export default function FullPortfolio({ visible, onClose }) {
           padding: '40px 24px 32px', gap: 16,
           overflowY: 'auto',
         }}>
-          {/* Profile image — centered */}
-          <div style={{
-            width: 100, height: 100, borderRadius: '50%', overflow: 'hidden',
-            boxShadow: '0 0 0 2px white',
-            alignSelf: 'center', flexShrink: 0,
-          }}>
+          {/* Profile image — click returns to splash */}
+          <div
+            onClick={() => { onLogoClick?.(); onClose() }}
+            title="Back to splash"
+            style={{
+              width: 100, height: 100, borderRadius: '50%', overflow: 'hidden',
+              boxShadow: '0 0 0 2px white',
+              alignSelf: 'center', flexShrink: 0,
+              cursor: 'pointer', transition: 'transform 0.25s ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.07)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+          >
             <img src={profile.avatar} alt={profile.name} style={{
               width: '120%', height: 'auto',
               position: 'relative', top: '-86px', left: '-5px',
@@ -151,6 +164,29 @@ export default function FullPortfolio({ visible, onClose }) {
                   }} />
                 </a>
               ))}
+            </div>
+
+            {/* Section nav — controls the 3D scene section */}
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              {NAV_SECTIONS.map(({ id, label }) => {
+                const active = section === id
+                return (
+                  <button key={id} onClick={() => onSection?.(id)} style={{
+                    background: active ? 'rgba(255,255,255,0.1)' : 'none',
+                    border: '1px solid ' + (active ? 'rgba(255,255,255,0.3)' : 'transparent'),
+                    borderRadius: 20, padding: '5px 16px', cursor: 'pointer',
+                    fontFamily: 'Imprima, sans-serif', fontSize: '0.88rem',
+                    color: active ? '#fff' : 'rgba(255,255,255,0.4)',
+                    textShadow: active ? '0 0 10px rgba(255,255,255,0.5)' : 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                    onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'rgba(255,255,255,0.75)' }}
+                    onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
             </div>
 
             {/* Resume button */}

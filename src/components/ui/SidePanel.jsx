@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { id: 'projects',   label: 'Projects' },
 ]
 
-export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose }) {
+export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose, onLogoClick }) {
   const [rendered, setRendered] = useState(section)
   const outerRef  = useRef()
   const dragState = useRef({ active: false, startX: 0 })
@@ -187,7 +187,7 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255,255,255,0.08) transparent',
         }}>
-          {rendered === 'about'      && <AboutSection />}
+          {rendered === 'about'      && <AboutSection onLogoClick={onLogoClick} />}
           {rendered === 'experience' && <ExperienceSection expanded={panelMode === 'expanded'} />}
           {rendered === 'projects'   && <ProjectsSection expanded={panelMode === 'expanded'} />}
         </div>
@@ -197,16 +197,23 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
 }
 
 // ─── About section ────────────────────────────────────────────
-function AboutSection() {
+function AboutSection({ onLogoClick }) {
   return (
     <div style={{ padding: '28px 24px 48px' }}>
 
       {/* Profile block */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-        <div style={{
-          width: 68, height: 68, borderRadius: '50%', overflow: 'hidden',
-          boxShadow: '0 0 0 2px white', flexShrink: 0,
-        }}>
+        <div
+          onClick={onLogoClick}
+          title="Back to splash"
+          style={{
+            width: 68, height: 68, borderRadius: '50%', overflow: 'hidden',
+            boxShadow: '0 0 0 2px white', flexShrink: 0,
+            cursor: 'pointer', transition: 'transform 0.25s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)' }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        >
           <img src={a('/assets/profile_picture_landing.jpg')} alt={profile.name} style={{
             width: '120%', height: 'auto',
             position: 'relative', top: '-41px', left: '-5px',

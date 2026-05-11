@@ -5,9 +5,7 @@ import { Vector3 } from 'three'
 import Garage from './components/Garage'
 import Car from './components/Car'
 import BlobShadow from './components/BlobShadow'
-import EnterPrompt from './components/ui/EnterPrompt'
 import FullPortfolio from './components/ui/FullPortfolio'
-import SectionNav from './components/ui/SectionNav'
 import SidePanel from './components/ui/SidePanel'
 
 import { profile, social } from './data/portfolio'
@@ -25,7 +23,6 @@ useGLTF.preload(m8Url)
 
 const DEG = Math.PI / 180
 
-// Splash-screen resting camera position
 const CAM_START = [-0.6946, 0.0169, 0.7204]
 
 const SECTION_CAMS = {
@@ -43,17 +40,16 @@ const SECTION_CAMS = {
   },
 }
 
-const SECTIONS   = ['about', 'experience', 'projects']
-const INTRO_MS   = 2000
+const SECTIONS = ['about', 'experience', 'projects']
+const INTRO_MS = 2000
 
-// All three cars — positions are the starting defaults; debug mode makes them draggable
 const CAR_CONFIGS = [
-  { id: 'carrera', url: carreraUrl, pos: [-0.47,  -0.2335,  0.45], rot: [0, 106 * DEG, 0], scale: 0.09, label: 'Carrera GT' },
-  { id: 'rx7',     url: rx7Url,     pos: [-0.60,  -0.09,    0.10], rot: [0,  50 * DEG, 0], scale: 0.12, label: 'RX-7 FD'   },
-  { id: 'm8',      url: m8Url,      pos: [-0.0255, -0.233, -0.2080], rot: [0, -12 * DEG, 0], scale: 9, label: 'BMW M8'},
+  { id: 'carrera', url: carreraUrl, pos: [-0.47,  -0.2335,  0.45],   rot: [0, 106 * DEG, 0], scale: 0.09, label: 'Carrera GT' },
+  { id: 'rx7',     url: rx7Url,     pos: [-0.60,  -0.09,    0.10],   rot: [0,  50 * DEG, 0], scale: 0.12, label: 'RX-7 FD'   },
+  { id: 'm8',      url: m8Url,      pos: [-0.0255, -0.233, -0.2080], rot: [0, -12 * DEG, 0], scale: 9,    label: 'BMW M8'    },
 ]
 
-// --- Debug: invisible floor plane that tracks pointer during a car drag ---
+// --- Debug: floor drag plane ---
 function DebugScene({ carPositions, dragIndex, onCarPositionChange, onDragEnd }) {
   if (dragIndex === null) return null
   const y = carPositions[dragIndex][1]
@@ -78,7 +74,7 @@ function DebugScene({ carPositions, dragIndex, onCarPositionChange, onDragEnd })
   )
 }
 
-// --- Debug: HTML overlay showing live camera + car coordinates ---
+// --- Debug: HTML overlay ---
 function DebugOverlay({ debugInfoRef, carPositions, dragIndex }) {
   const posRef    = useRef()
   const targetRef = useRef()
@@ -111,12 +107,9 @@ function DebugOverlay({ debugInfoRef, carPositions, dragIndex }) {
       <div style={{ color: '#555', fontSize: 10, marginBottom: 1 }}>CAMERA</div>
       <div>pos&nbsp;&nbsp;&nbsp; <span ref={posRef} /></div>
       <div>target <span ref={targetRef} /></div>
-      <div style={{ color: '#555', fontSize: 10, marginTop: 10, marginBottom: 1 }}>CARS &nbsp;<span style={{ color: '#444' }}>click + drag to move</span></div>
+      <div style={{ color: '#555', fontSize: 10, marginTop: 10, marginBottom: 1 }}>CARS &nbsp;<span style={{ color: '#444' }}>click + drag · scroll = Y</span></div>
       {CAR_CONFIGS.map((cfg, i) => (
-        <div key={cfg.id} style={{
-          color: dragIndex === i ? '#ffcc00' : '#00ff88',
-          marginBottom: 1,
-        }}>
+        <div key={cfg.id} style={{ color: dragIndex === i ? '#ffcc00' : '#00ff88', marginBottom: 1 }}>
           {cfg.label.padEnd(12)}[{carPositions[i].map(v => v.toFixed(4).padStart(8)).join(', ')}]
         </div>
       ))}
@@ -124,18 +117,59 @@ function DebugOverlay({ debugInfoRef, carPositions, dragIndex }) {
   )
 }
 
+// --- Controls hint (top-left, faded, horizontal) ---
+const HINTS = [
+  { key: '← →', label: 'navigate' },
+  { key: '↑ ↓', label: 'web view' },
+  { key: 'click', label: 'cycle / open' },
+  { key: 'U',    label: 'hide controls' },
+  { key: 'D',    label: 'debug' },
+]
+
+function ControlsHint({ visible }) {
+  if (!visible) return null
+  return (
+    <div
+      style={{
+        position: 'fixed', top: 20, left: 24, zIndex: 30,
+        display: 'flex', alignItems: 'center', gap: 20,
+        color: '#fff', fontFamily: 'Imprima, sans-serif',
+        fontSize: '0.75rem',
+        opacity: 0.50, transition: 'opacity 0.25s ease',
+        pointerEvents: 'auto', userSelect: 'none',
+        letterSpacing: '0.03em',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.opacity = '1' }}
+      onMouseLeave={e => { e.currentTarget.style.opacity = '0.18' }}
+    >
+      {HINTS.map(({ key, label }) => (
+        <span key={key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ opacity: 0.5, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{key}</span>
+          <span style={{ opacity: 0.85 }}>{label}</span>
+        </span>
+      ))}
+    </div>
+  )
+}
+
 // --- Scene camera ---
 function SceneControls({ section, startIntro, introComplete, onIntroComplete, debugInfoRef, debugMode, dragIndex }) {
-  const ccRef        = useRef()
-  const startedRef   = useRef(false)
-  const prevSection  = useRef('about')
-  const trans        = useRef(null)   // { sp, st, ep, et, elapsed, dur, arc, isIntro, onDone? }
-  const curTarget    = useRef(new Vector3(...SECTION_CAMS.about.target))
-  const { camera }   = useThree()
+  const ccRef       = useRef()
+  const startedRef  = useRef(false)
+  const prevSection = useRef('about')
+  const trans       = useRef(null)
+  const curTarget   = useRef(new Vector3(...SECTION_CAMS.about.target))
+  const { camera }  = useThree()
+
+  // Reset startedRef whenever we return to splash so the drop replays each entry
+  useEffect(() => {
+    if (startIntro) return
+    startedRef.current = false
+  }, [startIntro])
 
   useEffect(() => {
     if (!startIntro) return
-    if (startedRef.current) { onIntroComplete(); return }
+    if (startedRef.current) return   // already animating or done — section effect handles camera
     startedRef.current = true
     const { pos: rp, target: rt } = SECTION_CAMS.about
     trans.current = {
@@ -151,7 +185,6 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
     if (!introComplete) return
     const { pos, target } = SECTION_CAMS[section]
     const ct = curTarget.current
-    // Arc only when the path passes near the Carrera GT (about ↔ experience)
     const needsArc = section === 'about' || prevSection.current === 'about'
     prevSection.current = section
     trans.current = {
@@ -186,12 +219,8 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
       const tr = trans.current
       tr.elapsed += delta
       const rawT = Math.min(tr.elapsed / tr.dur, 1)
-
-      // Normalized exponential ease-out: curve is forced through (0,0)→(1,1)
-      // so there's no snap at the end — it truly decelerates into the target.
-      // Intro uses a softer exponent for the cinematic drop feel.
       const exp  = tr.isIntro ? 6 : 5
-      const norm = 1 - Math.pow(2, -exp)          // value the raw curve reaches at t=1
+      const norm = 1 - Math.pow(2, -exp)
       const t    = rawT >= 1 ? 1 : (1 - Math.pow(2, -exp * rawT)) / norm
 
       px = tr.sp[0] + (tr.ep[0] - tr.sp[0]) * t
@@ -200,8 +229,6 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
       lx = tr.st[0] + (tr.et[0] - tr.st[0]) * t
       ly = tr.st[1] + (tr.et[1] - tr.st[1]) * t
       lz = tr.st[2] + (tr.et[2] - tr.st[2]) * t
-
-      // Arc camera upward through the midpoint — curves over cars, not through them
       py += Math.sin(rawT * Math.PI) * tr.arc
 
       if (rawT >= 1) {
@@ -220,7 +247,6 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
       return
     }
 
-    // Organic camera shake — two incommensurate frequencies per axis
     const sx = (Math.sin(time * 0.71) * 0.55 + Math.sin(time * 2.13) * 0.45) * 0.0028
     const sy = (Math.sin(time * 0.53) * 0.60 + Math.sin(time * 1.87) * 0.40) * 0.0018
 
@@ -242,20 +268,19 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
 export default function App() {
   const tooltipRef     = useRef()
   const manualCloseRef = useRef(false)
-  const firstIntroRef  = useRef(true)   // true until first intro completes
   const debugInfoRef   = useRef({ pos: [0, 0, 0], target: [0, 0, 0] })
 
   const [phase,         setPhase]         = useState('splash')
   const [section,       setSection]       = useState('about')
   const [introComplete, setIntroComplete] = useState(false)
   const [portfolioOpen, setPortfolioOpen] = useState(false)
-  const [panelMode,     setPanelMode]     = useState('normal')
+  const [panelMode,     setPanelMode]     = useState('hidden')
   const [debugMode,     setDebugMode]     = useState(false)
   const [dragIndex,     setDragIndex]     = useState(null)
   const [carPositions,  setCarPositions]  = useState(CAR_CONFIGS.map(c => [...c.pos]))
+  const [showControls,  setShowControls]  = useState(true)
 
   const onIntroComplete = useCallback(() => {
-    firstIntroRef.current = false
     setIntroComplete(true)
     setPhase('ready')
   }, [])
@@ -268,25 +293,20 @@ export default function App() {
 
   const closePortfolio = useCallback(() => setPortfolioOpen(false), [])
 
-  // Return to splash -- only resets camera on very first visit
+  // Going to splash always resets intro so the camera drop plays again
   const goToSplash = useCallback(() => {
     setPhase('splash')
     setSection('about')
     setPanelMode('normal')
     manualCloseRef.current = false
     setPortfolioOpen(false)
-    // Only reset introComplete on first visit so camera doesn't re-animate
-    if (firstIntroRef.current) setIntroComplete(false)
+    setIntroComplete(false)
   }, [])
 
-  // Cycle sidebar: normal -> expanded -> hidden -> normal
   const cycleMode = useCallback(() => {
     setPanelMode(m => {
       if (m === 'normal') return 'expanded'
-      if (m === 'expanded') {
-        manualCloseRef.current = true
-        return 'hidden'
-      }
+      if (m === 'expanded') { manualCloseRef.current = true; return 'hidden' }
       manualCloseRef.current = false
       return 'normal'
     })
@@ -297,12 +317,18 @@ export default function App() {
     setPanelMode('hidden')
   }, [])
 
-  // Only auto-reset panel mode on section change if user didn't manually close
-  useEffect(() => {
-    if (!manualCloseRef.current) setPanelMode('normal')
-  }, [section])
+  // 3D space click: first click opens sidebar, subsequent clicks cycle section
+  const handleSceneClick = useCallback(() => {
+    if (debugMode || phase !== 'ready' || portfolioOpen) return
+    if (panelMode === 'hidden') {
+      manualCloseRef.current = false
+      setPanelMode('normal')
+    } else {
+      setSection(s => SECTIONS[(SECTIONS.indexOf(s) + 1) % SECTIONS.length])
+    }
+  }, [debugMode, phase, portfolioOpen, panelMode])
 
-  // Arrow keys: Left/Right navigate sections, Up opens web view
+  // Arrow key navigation
   useEffect(() => {
     const fn = e => {
       if (phase !== 'ready') return
@@ -310,34 +336,43 @@ export default function App() {
         if (e.key === 'Escape') closePortfolio()
         return
       }
-      if (e.key === 'ArrowRight' || e.key === 'Enter') {
+      if (e.key === 'ArrowRight') {
         setSection(s => SECTIONS[(SECTIONS.indexOf(s) + 1) % SECTIONS.length])
       } else if (e.key === 'ArrowLeft') {
         setSection(s => SECTIONS[(SECTIONS.indexOf(s) - 1 + SECTIONS.length) % SECTIONS.length])
       } else if (e.key === 'ArrowUp') {
         openPortfolio()
+      } else if (e.key === 'ArrowDown') {
+        closePortfolio()
       }
     }
     window.addEventListener('keydown', fn)
     return () => window.removeEventListener('keydown', fn)
-  }, [phase, portfolioOpen, openPortfolio, closePortfolio])
+  }, [phase, portfolioOpen, closePortfolio])
 
-  // D key: enter debug mode, or (if already in debug) reload page to reset everything
+  // U: toggle controls hint
+  useEffect(() => {
+    const fn = e => {
+      if (e.key !== 'u' && e.key !== 'U') return
+      if (phase !== 'ready') return
+      setShowControls(v => !v)
+    }
+    window.addEventListener('keydown', fn)
+    return () => window.removeEventListener('keydown', fn)
+  }, [phase])
+
+  // D: debug mode / reset
   useEffect(() => {
     const fn = e => {
       if (e.key !== 'd' && e.key !== 'D') return
       if (phase === 'splash') return
-      if (debugMode) {
-        window.location.reload()
-      } else {
-        setDebugMode(true)
-      }
+      if (debugMode) { window.location.reload() } else { setDebugMode(true) }
     }
     window.addEventListener('keydown', fn)
     return () => window.removeEventListener('keydown', fn)
   }, [phase, debugMode])
 
-  // Global fixed tooltip
+  // Global tooltip
   useEffect(() => {
     const tip = tooltipRef.current
     if (!tip) return
@@ -362,16 +397,12 @@ export default function App() {
   }, [])
 
   const handleCarPositionChange = useCallback((index, newPos) => {
-    setCarPositions(prev => {
-      const next = [...prev]
-      next[index] = newPos
-      return next
-    })
+    setCarPositions(prev => { const next = [...prev]; next[index] = newPos; return next })
   }, [])
 
   const handleDragEnd = useCallback(() => setDragIndex(null), [])
 
-  // Scroll wheel adjusts Y of the selected car while dragging
+  // Scroll wheel: Y adjustment for dragged car
   useEffect(() => {
     if (dragIndex === null) return
     const fn = e => {
@@ -399,6 +430,7 @@ export default function App() {
         dpr={[0.5, 1]}
         gl={{ powerPreference: 'high-performance', antialias: true }}
         performance={{ min: 0.5 }}
+        onClick={handleSceneClick}
       >
         <color attach="background" args={['#0d0d0d']} />
         <fog attach="fog" args={['#0d0d0d', 1.5, 4]} />
@@ -419,7 +451,7 @@ export default function App() {
           ))}
           <BlobShadow position={[-0.5,   -0.225,  0.46]}  width={0.665} length={0.36} opacity={0.85} />
           <BlobShadow position={[-0.397, -0.225,  0.008]} width={0.665} length={0.36} opacity={0.85} yRotation={-43 * DEG} />
-          <BlobShadow position={[-0.055,  -0.225, -0.15]}  width={0.665} length={0.46} opacity={0.85} yRotation={70 * DEG} />
+          <BlobShadow position={[-0.055, -0.225, -0.15]}  width={0.665} length={0.46} opacity={0.85} yRotation={70 * DEG} />
           {debugMode && (
             <DebugScene
               carPositions={carPositions}
@@ -444,11 +476,7 @@ export default function App() {
 
       {/* -- Debug overlay -- */}
       {debugMode && (
-        <DebugOverlay
-          debugInfoRef={debugInfoRef}
-          carPositions={carPositions}
-          dragIndex={dragIndex}
-        />
+        <DebugOverlay debugInfoRef={debugInfoRef} carPositions={carPositions} dragIndex={dragIndex} />
       )}
 
       {/* -- Vignette -- */}
@@ -457,26 +485,38 @@ export default function App() {
         background: 'radial-gradient(ellipse at 40% 60%, transparent 22%, rgba(0,0,0,0.78) 100%)',
       }} />
 
-      {/* -- Splash overlay -- */}
+      {/* -- Splash overlay: rx7 background fades to reveal 3D scene -- */}
       <div style={{
         position: 'fixed', inset: 0, zIndex: 50,
         pointerEvents: splashDone ? 'none' : 'auto',
         opacity: splashDone ? 0 : 1,
-        transition: 'opacity 0.85s ease',
+        transition: 'opacity 1.1s ease',
       }}>
+        {/* rx7 photo background */}
         <div style={{
           position: 'absolute', inset: 0,
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
-          background: 'rgba(0,0,0,0.3)',
+          backgroundImage: `url(${a('/assets/rx7_background.jpg')})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
         }} />
+        {/* dark overlay so text reads cleanly */}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.52)' }} />
+        {/* red glow lights */}
         <div style={{
           position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          filter: 'brightness(2)',
+          opacity: 0.32, mixBlendMode: 'screen',
+        }} />
+
+        {/* Hero — left-aligned, v1 style */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 1,
+          display: 'flex', alignItems: 'center', paddingLeft: '10vw',
         }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 30 }}>
             <div style={{
-              width: 160, height: 160, borderRadius: '50%', overflow: 'hidden',
+              width: 200, height: 200, borderRadius: '50%', overflow: 'hidden',
               boxShadow: '0 0 0 2px white', flexShrink: 0,
             }}>
               <img src={a('/assets/profile_picture_landing.jpg')} alt={profile.name} style={{
@@ -484,11 +524,11 @@ export default function App() {
                 position: 'relative', top: '-86px', left: '-5px',
               }} />
             </div>
-            <div style={{ paddingTop: 28 }}>
+            <div>
               <h1 style={{
-                fontFamily: 'Imprima, sans-serif', fontSize: 'clamp(2rem, 4vw, 3rem)',
-                color: '#fff', textShadow: '0 0 24px rgba(255,255,255,0.5)',
-                marginBottom: 14, lineHeight: 1.1,
+                fontFamily: 'Imprima, sans-serif', fontSize: 'clamp(2.25rem, 4vw, 3rem)',
+                color: '#fff', textShadow: '0 0 8px rgba(255,255,255,0.8)',
+                margin: '0 0 12px', lineHeight: 1.1,
               }}>
                 {profile.name}
               </h1>
@@ -517,11 +557,13 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* Continue prompt */}
         <div
           onClick={() => setPhase('intro')}
           style={{
             position: 'absolute', bottom: 60, left: '50%', transform: 'translateX(-50%)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+            zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
             cursor: 'pointer', animation: 'pulse 2s ease-in-out infinite',
           }}
         >
@@ -538,22 +580,10 @@ export default function App() {
 
       {!splashDone && <SplashKeyListener onEnter={() => setPhase('intro')} />}
 
-      {/* -- Backdrop -- click outside sidebar to close it -- */}
-      {splashDone && panelMode !== 'hidden' && !portfolioOpen && (
-        <div
-          onClick={closeSidebarManually}
-          style={{ position: 'fixed', inset: 0, zIndex: 24, cursor: 'default' }}
-        />
+      {/* -- Controls hint (top-left) -- */}
+      {splashDone && !portfolioOpen && (
+        <ControlsHint visible={showControls} />
       )}
-
-      {/* -- Top nav -- */}
-      <SectionNav
-        section={section}
-        onSection={s => { setSection(s); manualCloseRef.current = false }}
-        disabled={!splashDone}
-        dimmed={splashDone && panelMode !== 'hidden'}
-        onLogoClick={goToSplash}
-      />
 
       {/* -- Bottom-left identity -- visible only when sidebar is hidden -- */}
       <div style={{
@@ -610,12 +640,9 @@ export default function App() {
 
       {/* -- Left-edge social column -- */}
       <div style={{
-        position: 'fixed', left: 20, top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: 20,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
-        opacity: bioVisible ? 1 : 0,
-        transition: 'opacity 0.6s ease',
+        position: 'fixed', left: 20, top: '50%', transform: 'translateY(-50%)',
+        zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
+        opacity: bioVisible ? 1 : 0, transition: 'opacity 0.6s ease',
         pointerEvents: bioVisible ? 'auto' : 'none',
       }}>
         {social.map(({ href, icon, label }) => (
@@ -634,21 +661,25 @@ export default function App() {
       </div>
 
       {/* -- Side panel -- */}
-      {splashDone && <SidePanel
-        section={section}
-        onSection={s => { setSection(s); manualCloseRef.current = false }}
-        showAbout={splashDone}
-        panelMode={panelMode}
-        onCycleMode={cycleMode}
-        onManualClose={closeSidebarManually}
-      />}
-
-      {/* -- up prompt -- */}
-      {phase === 'ready' && !portfolioOpen && section === 'about' && panelMode === 'hidden' && (
-        <EnterPrompt onEnter={openPortfolio} />
+      {splashDone && (
+        <SidePanel
+          section={section}
+          onSection={s => { setSection(s); manualCloseRef.current = false }}
+          showAbout={splashDone}
+          panelMode={panelMode}
+          onCycleMode={cycleMode}
+          onManualClose={closeSidebarManually}
+          onLogoClick={goToSplash}
+        />
       )}
 
-      <FullPortfolio visible={portfolioOpen} onClose={closePortfolio} />
+      <FullPortfolio
+        visible={portfolioOpen}
+        onClose={closePortfolio}
+        section={section}
+        onSection={s => { setSection(s); manualCloseRef.current = false }}
+        onLogoClick={goToSplash}
+      />
 
       {/* -- Global tooltip -- */}
       <div
@@ -661,8 +692,7 @@ export default function App() {
           pointerEvents: 'none', opacity: 0,
           transition: 'opacity 0.15s ease',
           border: '1px solid rgba(255,255,255,0.14)',
-          letterSpacing: '0.05em',
-          transform: 'translateX(-50%)',
+          letterSpacing: '0.05em', transform: 'translateX(-50%)',
         }}
       />
 
@@ -670,10 +700,6 @@ export default function App() {
         @keyframes pulse {
           0%, 100% { opacity: 0.65; transform: translateX(-50%) translateY(0); }
           50%       { opacity: 1;    transform: translateX(-50%) translateY(5px); }
-        }
-        @keyframes promptFadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
         }
       `}</style>
     </div>
