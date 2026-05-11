@@ -540,19 +540,19 @@ function ExperienceTab({ expTab, setExpTab }) {
 function ExperienceCard({ item, accent }) {
   return (
     <div style={{
-      border: '1px solid rgba(255,255,255,0.1)',
+      border: '1px solid rgba(255,255,255,0.22)',
       background: 'rgba(0,0,0,0.45)',
       backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
       padding: '20px 22px', display: 'flex', gap: 18,
       transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
       position: 'relative', zIndex: 3,
     }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.4)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.4), 0 0 22px rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.75)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)' }}
     >
       <div style={{
         width: 52, height: 52, flexShrink: 0,
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.2)',
         background: 'rgba(255,255,255,0.04)', overflow: 'hidden',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
@@ -625,15 +625,15 @@ function ProjectCard({ item, accent }) {
   const primaryLink = item.live || item.video || item.github || item.figma || item.drive || null
   return (
     <div style={{
-      border: '1px solid rgba(255,255,255,0.13)',
+      border: '1px solid rgba(255,255,255,0.22)',
       background: 'rgba(0,0,0,0.48)',
       backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
       display: 'flex', flexDirection: 'column',
       position: 'relative', zIndex: 3,
       transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
     }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.13)' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.5), 0 0 22px rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.75)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)' }}
     >
       {item.badge && (
         <div style={{

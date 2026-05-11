@@ -116,15 +116,17 @@ function ExperienceCard({ item, accent, forceExpanded }) {
       marginBottom: 12,
       padding: '13px 13px',
       background: 'rgba(255,255,255,0.025)',
-      border: '1px solid rgba(255,255,255,0.07)',
-      borderLeft: `2px solid ${accent}66`,
-      transition: 'border-color 0.2s',
-    }}>
+      border: '1px solid rgba(255,255,255,0.18)',
+      borderLeft: `2px solid ${accent}`,
+      transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.75)'; e.currentTarget.style.boxShadow = '0 4px 18px rgba(0,0,0,0.35), 0 0 18px rgba(255,255,255,0.06)' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; e.currentTarget.style.boxShadow = 'none' }}>
       <div style={{ display: 'flex', gap: 11, marginBottom: 9 }}>
         {item.logo && (
           <div style={{
             width: 38, height: 38, flexShrink: 0,
-            border: '1px solid rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.2)',
             background: 'rgba(255,255,255,0.04)',
             overflow: 'hidden', display: 'flex',
             alignItems: 'center', justifyContent: 'center',
