@@ -11,10 +11,7 @@ Check it out: [kushagrakatiyar06.github.io/Portfolio-v1](https://kushagrakatiyar
 
 ## Tech Stack
 
-**Frontend:** React 18, Vite
-**3D:** Three.js, React Three Fiber, React Three Drei
-**Models:** Custom .glb models 
-**Deployment:** GitHub Actions → GitHub Pages
+**Frontend:** React 18, Vite, Three.js, React Three Fiber, React Three Drei
 
 ---
 
