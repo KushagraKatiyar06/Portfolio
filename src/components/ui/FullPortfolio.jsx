@@ -82,9 +82,9 @@ const NAV_TABS = [
 ]
 
 const EXP_GROUPS = [
-  { key: 'experience',     label: 'Professional Experience', accent: '#48bcff' },
-  { key: 'leadership',     label: 'Leadership',              accent: '#b187ff' },
+  { key: 'experience',      label: 'Professional Experience', accent: '#48bcff' },
   { key: 'extracurricular', label: 'Extracurriculars',       accent: '#ffd166' },
+  { key: 'leadership',      label: 'Leadership',              accent: '#b187ff' },
 ]
 
 const PROJ_GROUPS = [
@@ -125,7 +125,17 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
   const [projTab,      setProjTab]      = useState('live')
   const [flashing,     setFlashing]     = useState(false)
   const [transitionKey, setTransKey]   = useState(0)
+  const [isMobile,     setIsMobile]    = useState(false)
   const flashTimer = useRef(null)
+  const flashKey = useRef(0)
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (visible) {
@@ -150,10 +160,11 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
   }, [visible, onClose])
 
   function triggerFlash() {
+    flashKey.current++
     clearTimeout(flashTimer.current)
     setFlashing(false)
     requestAnimationFrame(() => requestAnimationFrame(() => setFlashing(true)))
-    flashTimer.current = setTimeout(() => setFlashing(false), 750)
+    flashTimer.current = setTimeout(() => setFlashing(false), 600)
   }
 
   const switchTab = id => {
@@ -176,20 +187,21 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
       {/* Background */}
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: `url(${a('/assets/rx7_background.jpg')})`,
+        backgroundImage: isMobile ? 'none' : `url(${a('/assets/rx7_background.jpg')})`,
+        backgroundColor: '#0a0a0a',
         backgroundSize: 'cover', backgroundPosition: 'center',
         filter: 'brightness(0.3) saturate(0.8)',
       }} />
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.52)' }} />
 
-      {/* Lights flash */}
+      {/* Lights flash on tab change */}
       {flashing && (
-        <div key={Date.now()} style={{
+        <div key={flashKey.current} style={{
           position: 'absolute', inset: 0, zIndex: 2,
           backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
           backgroundSize: 'cover', backgroundPosition: 'center',
           mixBlendMode: 'screen', filter: 'brightness(2)',
-          animation: 'lightsFlash 0.75s ease-out forwards',
+          animation: 'lightsFlash 0.3s ease-out forwards',
           pointerEvents: 'none',
         }} />
       )}

@@ -291,6 +291,15 @@ export default function App() {
   const [splashFlashing,  setSplashFlashing]  = useState(false)
   const splashFlashKey  = useRef(0)
   const splashExitTimer = useRef(null)
+  const [isMobile, setIsMobile] = useState(false)
+  
+  // Detect mobile on mount and on resize
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const onIntroComplete = useCallback(() => {
     setIntroComplete(true)
@@ -353,7 +362,7 @@ export default function App() {
     }
   }, [debugMode, phase, portfolioOpen, panelMode])
 
-  // Arrow key + Enter navigation
+  // Arrow key + Enter navigation (reversed cycling)
   useEffect(() => {
     const fn = e => {
       if (phase !== 'ready') return
@@ -361,9 +370,9 @@ export default function App() {
         if (e.key === 'Escape') closePortfolio()
         return
       }
-      if (e.key === 'ArrowRight') {
+      if (e.key === 'ArrowLeft') {
         setSection(s => SECTIONS[(SECTIONS.indexOf(s) + 1) % SECTIONS.length])
-      } else if (e.key === 'ArrowLeft') {
+      } else if (e.key === 'ArrowRight') {
         setSection(s => SECTIONS[(SECTIONS.indexOf(s) - 1 + SECTIONS.length) % SECTIONS.length])
       } else if (e.key === 'ArrowUp') {
         openPortfolio()
@@ -458,17 +467,31 @@ export default function App() {
 
   const splashDone = phase !== 'splash'
   const bioVisible = phase === 'ready' && panelMode === 'hidden'
+  
+  // On mobile, open portfolio immediately and hide 3D
+  useEffect(() => {
+    if (isMobile) {
+      setPortfolioOpen(true)
+      setPhase('intro')
+      setPanelMode('hidden')
+    }
+  }, [isMobile])
 
   return (
     <div style={{ width: '100vw', height: '100vh', fontFamily: 'Imprima, sans-serif' }}>
 
-      {/* -- 3D Canvas -- */}
-      <Canvas
+      {/* -- 3D Canvas (Desktop only) -- */}
+      {!isMobile && <Canvas
         camera={{ position: CAM_START, fov: 60 }}
         dpr={[0.5, 1]}
         gl={{ powerPreference: 'high-performance', antialias: true }}
         performance={{ min: 0.5 }}
         onClick={handleSceneClick}
+        style={{
+          transform: portfolioOpen ? 'scale(0.85)' : 'scale(1)',
+          transformOrigin: 'center',
+          transition: portfolioOpen ? 'none' : 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
       >
         <color attach="background" args={['#0d0d0d']} />
         <fog attach="fog" args={['#0d0d0d', 1.5, 4]} />
@@ -510,7 +533,7 @@ export default function App() {
           dragIndex={dragIndex}
         />
         <AdaptiveDpr pixelated />
-      </Canvas>
+      </Canvas>}
 
       {/* -- Debug overlay -- */}
       {debugMode && (
@@ -559,22 +582,34 @@ export default function App() {
         }} />
         {/* dark overlay */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.52)' }} />
-        {/* ambient red glow */}
+        {/* pulsing ambient lights */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
           backgroundSize: 'cover', backgroundPosition: 'center',
-          filter: 'brightness(2)', opacity: 0.22, mixBlendMode: 'screen',
+          filter: 'brightness(2)', mixBlendMode: 'screen',
           pointerEvents: 'none',
+          animation: 'lightsPulse 2.5s ease-in-out infinite',
         }} />
-        {/* exit flash */}
+        {/* exit flash beep 1 */}
         {splashFlashing && (
-          <div key={splashFlashKey.current} style={{
+          <div key={`${splashFlashKey.current}-1`} style={{
             position: 'absolute', inset: 0, zIndex: 3,
             backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
             backgroundSize: 'cover', backgroundPosition: 'center',
             filter: 'brightness(2)', mixBlendMode: 'screen',
-            animation: 'lightsFlash 1.4s ease-out forwards',
+            animation: 'lightsFlash 0.3s ease-out forwards',
+            pointerEvents: 'none',
+          }} />
+        )}
+        {/* exit flash beep 2 */}
+        {splashFlashing && (
+          <div key={`${splashFlashKey.current}-2`} style={{
+            position: 'absolute', inset: 0, zIndex: 3,
+            backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            filter: 'brightness(2)', mixBlendMode: 'screen',
+            animation: 'lightsFlash 0.3s ease-out forwards 0.25s',
             pointerEvents: 'none',
           }} />
         )}
@@ -653,8 +688,6 @@ export default function App() {
       {splashDone && !portfolioOpen && (
         <ControlsHint visible={showControls} />
       )}
-
-
 
       {/* -- RX7 cursor follower -- */}
       <Rx7CursorFollower

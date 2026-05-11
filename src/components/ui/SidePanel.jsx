@@ -53,9 +53,12 @@ const NAV_ITEMS = [
 export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose, onLogoClick }) {
   const [rendered,      setRendered]  = useState(section)
   const [transitionKey, setTransKey]  = useState(0)
+  const [flashing,      setFlashing]  = useState(false)
   const prevRendered    = useRef(null)
   const outerRef        = useRef()
   const dragState       = useRef({ active: false, startX: 0 })
+  const flashKey        = useRef(0)
+  const flashTimer      = useRef(null)
 
   useEffect(() => {
     if (section !== 'about' || showAbout) setRendered(section)
@@ -64,6 +67,12 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
   useEffect(() => {
     if (prevRendered.current !== null && prevRendered.current !== rendered) {
       setTransKey(k => k + 1)
+      // Trigger flash on section change
+      flashKey.current++
+      clearTimeout(flashTimer.current)
+      setFlashing(false)
+      requestAnimationFrame(() => requestAnimationFrame(() => setFlashing(true)))
+      flashTimer.current = setTimeout(() => setFlashing(false), 750)
     }
     prevRendered.current = rendered
   }, [rendered])
@@ -150,6 +159,18 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
         display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
       }}>
+        {/* Lights flash on section change */}
+        {flashing && (
+          <div key={flashKey.current} style={{
+            position: 'absolute', inset: 0, zIndex: 12,
+            backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+            backgroundSize: 'cover', backgroundPosition: 'right center',
+            mixBlendMode: 'screen', filter: 'brightness(2)',
+            animation: 'lightsFlash 0.3s ease-out forwards',
+            pointerEvents: 'none',
+          }} />
+        )}
+
         {/* Background layers */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
           <div style={{
