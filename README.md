@@ -15,17 +15,6 @@ Check it out: [kushagrakatiyar06.github.io/Portfolio-v1](https://kushagrakatiyar
 
 ---
 
-## Features
-
-- Interactive 3D garage scene with two car models and dynamic lighting
-- Cinematic camera that smoothly transitions between About, Experience, and Projects sections
-- Animated sidebar with expandable content panels
-- Keyboard navigation — arrow keys to cycle sections, Enter to open full portfolio view
-- Responsive splash screen with intro animation
-- Adaptive DPR for performance scaling
-
----
-
 ## Setup
 
 ```bash
