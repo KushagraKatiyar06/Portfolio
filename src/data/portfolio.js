@@ -1,9 +1,7 @@
-// ─────────────────────────────────────────────
-//  COMMON PORTFOLIO DATABASE
-// ─────────────────────────────────────────────
 const B = import.meta.env.BASE_URL
 const a = p => `${B}${p.replace(/^\//, '')}`
 
+// Name, title, location, bio, avatar and resume link shown across the site
 export const profile = {
   name:     'Kushagra Katiyar',
   title:    'CS @ University of Florida | Full-Stack Developer',
@@ -13,6 +11,7 @@ export const profile = {
   resume:   a('/assets/Kushagra_Katiyar_Software_Engineering_Resume.pdf'),
 }
 
+// Social media links shown as icon columns on the landing page and web view
 export const social = [
   { href: 'https://github.com/KushagraKatiyar06',         icon: a('/assets/github_icon.svg'),    label: 'GitHub' },
   { href: 'https://www.linkedin.com/in/kushagrakatiyar/', icon: a('/assets/linkedin_icon.svg'),  label: 'LinkedIn' },
@@ -20,6 +19,7 @@ export const social = [
   { href: 'https://www.tiktok.com/@just_kushagra',        icon: a('/assets/tiktok_icon.svg'),    label: 'TikTok' },
 ]
 
+// Tech stack displayed as icon grids in the About tab, grouped by category
 export const skills = {
   Languages: [
     { label: 'Python',      icon: a('/assets/python.svg') },
@@ -36,8 +36,7 @@ export const skills = {
     { label: 'Flask',       icon: a('/assets/flask.svg') },
     { label: 'Vite',        icon: a('/assets/vite.svg') },
     { label: 'Expo',        icon: a('/assets/expo.svg')},
-    { label: 'PostgreSQL',  icon: a('/assets/postgres.svg')
-    },
+    { label: 'PostgreSQL',  icon: a('/assets/postgres.svg') },
   ],
   DevOps: [
     { label: 'Docker',      icon: a('/assets/docker.svg') },
@@ -60,6 +59,10 @@ export const skills = {
   ],
 }
 
+// All experience entries. The `type` field controls which tab each entry appears under:
+//   'experience'      → Professional Experience
+//   'extracurricular' → Extracurriculars
+//   'leadership'      → Leadership
 export const experiences = [
   {
     type: 'leadership',
@@ -297,9 +300,13 @@ export const experiences = [
   },
 ]
 
+// Projects split into three tabs. The `badge` field renders a gold label on the card.
+//   live      → shipped, publicly accessible projects
+//   technical → engineering-heavy builds
+//   design    → UI/UX and design-focused work
 export const projects = {
   live: [
-      {
+    {
       name: 'Riva',
       subtitle: 'Agentic AI Browser & GTM Tool',
       image: a('/assets/projects/riva.png'),
@@ -318,7 +325,6 @@ export const projects = {
         { label: 'Figma',       icon: a('/assets/figma.svg') },
       ],
     },
-
     {
       name: 'KeyFrame',
       subtitle: 'Agentic AI Slideshow Generator',
@@ -390,10 +396,10 @@ export const projects = {
       github: 'https://github.com/KushagraKatiyar06/Portfolio-v2',
       figma: 'https://www.figma.com/design/QWqqPnfRkXt3neiDXrauF1/Portfolio?t=juGwiZwyrqI5RuM9-1',
       stack: [
-        { label: 'React',     icon: a('/assets/react.svg') },
-        { label: 'Blender', icon: a('/assets/blender.svg') },
-        { label: 'TypeScript',     icon: a('/assets/typescript.svg') },
-        { label: 'Figma',  icon: a('/assets/figma.svg') },
+        { label: 'React',      icon: a('/assets/react.svg') },
+        { label: 'Blender',    icon: a('/assets/blender.svg') },
+        { label: 'TypeScript', icon: a('/assets/typescript.svg') },
+        { label: 'Figma',      icon: a('/assets/figma.svg') },
       ],
     },
     {
@@ -404,10 +410,10 @@ export const projects = {
       github: 'https://github.com/KushagraKatiyar06/Portfolio-v1',
       figma: 'https://www.figma.com/design/QWqqPnfRkXt3neiDXrauF1/Portfolio?t=juGwiZwyrqI5RuM9-1',
       stack: [
-        { label: 'Figma',     icon: a('/assets/figma.svg') },
-        { label: 'HTML',     icon: a('/assets/html.svg') },
-        { label: 'CSS', icon: a('/assets/css.svg') },
-        { label: 'Javascript',     icon: a('/assets/javascript.svg') },
+        { label: 'Figma',      icon: a('/assets/figma.svg') },
+        { label: 'HTML',       icon: a('/assets/html.svg') },
+        { label: 'CSS',        icon: a('/assets/css.svg') },
+        { label: 'Javascript', icon: a('/assets/javascript.svg') },
       ],
     },
   ],
@@ -428,7 +434,7 @@ export const projects = {
         { label: 'Python',      icon: a('/assets/python.svg') },
         { label: 'Cloudflare',  icon: a('/assets/cloudflare.svg') },
         { label: 'Gemini',      icon: a('/assets/gemini.svg') },
-        { label: 'Figma',  icon: a('/assets/figma.svg') },
+        { label: 'Figma',       icon: a('/assets/figma.svg') },
       ],
     },
     {
@@ -448,7 +454,7 @@ export const projects = {
         { label: 'Cloudflare',  icon: a('/assets/cloudflare.svg') },
         { label: 'OpenAI',      icon: a('/assets/openai.svg') },
         { label: 'FFmpeg',      icon: a('/assets/ffmpeg.svg') },
-        { label: 'Figma',  icon: a('/assets/figma.svg') },
+        { label: 'Figma',       icon: a('/assets/figma.svg') },
       ],
     },
     {
@@ -495,7 +501,7 @@ export const projects = {
         { label: 'Crow',  icon: a('/assets/crow.svg') },
         { label: 'React', icon: a('/assets/react.svg') },
         { label: 'AWS',   icon: a('/assets/aws.svg') },
-        { label: 'Figma',  icon: a('/assets/figma.svg') },
+        { label: 'Figma', icon: a('/assets/figma.svg') },
       ],
     },
     {
@@ -504,11 +510,11 @@ export const projects = {
       image: a('/assets/projects/trainoffourcover.png'),
       figma: 'https://www.figma.com/design/9xN80lyUwTB49QHRoiEFOM/Train-of-Four?node-id=0-1&t=xCj48S77fSBcetZM-1',
       stack: [
-        { label: 'Python',  icon: a('/assets/python.svg') },
-        { label: 'Java', icon: a('/assets/java.svg') },
-        { label: 'Kotlin',  icon: a('/assets/kotlin.svg') },
-        { label: 'Mediapipe',  icon: a('/assets/mediapipe.svg') },
-        { label: 'Figma',  icon: a('/assets/figma.svg') },
+        { label: 'Python',    icon: a('/assets/python.svg') },
+        { label: 'Java',      icon: a('/assets/java.svg') },
+        { label: 'Kotlin',    icon: a('/assets/kotlin.svg') },
+        { label: 'Mediapipe', icon: a('/assets/mediapipe.svg') },
+        { label: 'Figma',     icon: a('/assets/figma.svg') },
       ],
     },
     {
@@ -519,10 +525,10 @@ export const projects = {
       github: 'https://github.com/KushagraKatiyar06/Portfolio-v2',
       figma: 'https://www.figma.com/design/QWqqPnfRkXt3neiDXrauF1/Portfolio?t=juGwiZwyrqI5RuM9-1',
       stack: [
-        { label: 'React',     icon: a('/assets/react.svg') },
-        { label: 'Blender', icon: a('/assets/blender.svg') },
-        { label: 'TypeScript',     icon: a('/assets/typescript.svg') },
-        { label: 'Figma',  icon: a('/assets/figma.svg') },
+        { label: 'React',      icon: a('/assets/react.svg') },
+        { label: 'Blender',    icon: a('/assets/blender.svg') },
+        { label: 'TypeScript', icon: a('/assets/typescript.svg') },
+        { label: 'Figma',      icon: a('/assets/figma.svg') },
       ],
     },
   ],
@@ -534,9 +540,9 @@ export const projects = {
       live: 'http://alexwillowmusic.com',
       figma: 'https://www.figma.com/design/AJj1ttznW3Z7to4AeR6cmU/Alex-Willow?node-id=0-1&t=juGwiZwyrqI5RuM9-1',
       stack: [
-        { label: 'React',     icon: a('/assets/react.svg') },
+        { label: 'React',      icon: a('/assets/react.svg') },
         { label: 'TypeScript', icon: a('/assets/typescript.svg') },
-        { label: 'Figma',  icon: a('/assets/figma.svg') },
+        { label: 'Figma',      icon: a('/assets/figma.svg') },
       ],
     },
     {
@@ -547,7 +553,7 @@ export const projects = {
       github: 'https://github.com/eshadesigns/Drift-Zero',
       video: 'https://youtu.be/QrSg8taswJk',
       stack: [
-        { label: 'React',     icon: a('/assets/react.svg') },
+        { label: 'React',      icon: a('/assets/react.svg') },
         { label: 'TypeScript', icon: a('/assets/typescript.svg') },
       ],
     },
@@ -571,11 +577,10 @@ export const projects = {
       image: a('/assets/projects/cfsg.png'),
       figma: 'https://www.figma.com/design/VDXqeQGoIH2rbVGeHfXZj0/Computing-For-Social-Good',
       stack: [
-        { label: 'Figma',  icon: a('/assets/figma.svg') },
-        { label: 'Canva',  icon: a('/assets/canva.svg') },
+        { label: 'Figma', icon: a('/assets/figma.svg') },
+        { label: 'Canva', icon: a('/assets/canva.svg') },
       ],
     },
-
     {
       name: 'Student Club Management Portal',
       subtitle: 'Computing Student Union',
@@ -586,7 +591,6 @@ export const projects = {
         { label: 'ShadCN', icon: a('/assets/shadcn.svg') },
       ],
     },
-
     {
       name: 'RTS Ride Redesign',
       subtitle: 'Public Bus Tracking App',
@@ -599,7 +603,6 @@ export const projects = {
         { label: 'Canva',  icon: a('/assets/canva.svg') },
       ],
     },
-
     {
       name: 'Portfolio (Old)',
       subtitle: 'Portfolio',
@@ -608,13 +611,12 @@ export const projects = {
       github: 'https://github.com/KushagraKatiyar06/Portfolio-v1',
       figma: 'https://www.figma.com/design/QWqqPnfRkXt3neiDXrauF1/Portfolio?t=juGwiZwyrqI5RuM9-1',
       stack: [
-        { label: 'Figma',     icon: a('/assets/figma.svg') },
-        { label: 'HTML',     icon: a('/assets/html.svg') },
-        { label: 'CSS', icon: a('/assets/css.svg') },
-        { label: 'Javascript',     icon: a('/assets/javascript.svg') },
+        { label: 'Figma',      icon: a('/assets/figma.svg') },
+        { label: 'HTML',       icon: a('/assets/html.svg') },
+        { label: 'CSS',        icon: a('/assets/css.svg') },
+        { label: 'Javascript', icon: a('/assets/javascript.svg') },
       ],
     },
-
     {
       name: 'Florida Fun',
       subtitle: 'Amusement Park Mobile & Web Screens',

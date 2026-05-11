@@ -70,7 +70,7 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
       clearTimeout(flashTimer.current)
       setFlashing(false)
       requestAnimationFrame(() => requestAnimationFrame(() => setFlashing(true)))
-      flashTimer.current = setTimeout(() => setFlashing(false), 750)
+      flashTimer.current = setTimeout(() => setFlashing(false), 900)
     }
     prevRendered.current = rendered
   }, [rendered])
@@ -157,14 +157,24 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
         overflow: 'hidden',
       }}>
         {flashing && (
-          <div key={flashKey.current} style={{
-            position: 'absolute', inset: 0, zIndex: 12,
-            backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
-            backgroundSize: 'cover', backgroundPosition: 'right center',
-            mixBlendMode: 'screen', filter: 'brightness(2)',
-            animation: 'lightsFlash 0.3s ease-out forwards',
-            pointerEvents: 'none',
-          }} />
+          <>
+            <div key={`${flashKey.current}-1`} style={{
+              position: 'absolute', inset: 0, zIndex: 12,
+              backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+              backgroundSize: 'cover', backgroundPosition: 'right center',
+              mixBlendMode: 'screen', filter: 'brightness(2)',
+              animation: 'lightsFlash 0.3s ease-out forwards',
+              pointerEvents: 'none',
+            }} />
+            <div key={`${flashKey.current}-2`} style={{
+              position: 'absolute', inset: 0, zIndex: 12,
+              backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+              backgroundSize: 'cover', backgroundPosition: 'right center',
+              mixBlendMode: 'screen', filter: 'brightness(2)',
+              animation: 'lightsFlash 0.3s ease-out forwards 0.35s',
+              pointerEvents: 'none',
+            }} />
+          </>
         )}
 
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>

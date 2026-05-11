@@ -4,7 +4,6 @@ import { a } from '../../utils/asset'
 import SplashParticles from './SplashParticles'
 import Rx7CursorFollower from './Rx7CursorFollower'
 
-// ─── Tech terms highlighted blue in bullets ───────────────────
 const TECH_TERMS = [
   'Agentic AI', 'GPT-4o', 'GPT-2', 'Next.js 14', 'Next.js 15', 'React 19',
   'AWS Polly', 'Flux-Schnell', 'Socket.io', 'Gmail API', 'Google Sheets', 'Google Forms',
@@ -17,9 +16,9 @@ const TECH_TERMS = [
   'GCP', 'AWS', 'LLM', 'RAG', 'OBS',
 ]
 
-// ─── Highlight numbers (orange/golden) + tech terms (blue) ───
+// Scans bullet text and wraps numbers in orange/gold and known tech terms in blue.
+// Runs on pre-split segments so spans from the number pass don't get double-processed.
 function hl(text) {
-  // Numbers: all → orange, % → golden, strip commas
   let result = text.replace(
     /\$[\d,]+(?:\s*→\s*\$[\d,]+)?|\b\d[\d,]*[×xX%+]|\b\d[\d,]*\b/g,
     m => {
@@ -30,6 +29,7 @@ function hl(text) {
     }
   )
   // Tech terms in non-span portions
+  // Split on existing spans so tech-term replacement only touches plain text segments
   const parts = result.split(/(<span\b[^>]*>[\s\S]*?<\/span>)/g)
   return parts.map((part, i) => {
     if (i % 2 === 1) return part
@@ -44,7 +44,6 @@ function hl(text) {
   }).join('')
 }
 
-// ─── Phrase highlights in bio ─────────────────────────────────
 const BIO_PHRASES = [
   { phrase: 'Computer Science at the University of Florida', color: '#ff9361' },
   { phrase: 'Agentic AI Systems',                           color: '#b187ff' },
@@ -76,7 +75,6 @@ function hlBio(text) {
   ).join('')
 }
 
-// ─── Section definitions with per-section accent colors ──────
 const NAV_TABS = [
   { id: 'about',      label: 'About'      },
   { id: 'experience', label: 'Experience' },
@@ -129,7 +127,6 @@ const PROJ_GROUPS = [
   { key: 'design',    label: 'Design',    accent: '#ffd166' },
 ]
 
-// ─── Resume button ────────────────────────────────────────────
 function ResumeButton() {
   return (
     <a href={profile.resume} target="_blank" rel="noreferrer" style={{
@@ -152,7 +149,6 @@ function ResumeButton() {
   )
 }
 
-// ─── Main ─────────────────────────────────────────────────────
 export default function FullPortfolio({ visible, onClose, section, onSection, onLogoClick }) {
   const [inDom,        setInDom]        = useState(false)
   const [show,         setShow]         = useState(false)
@@ -192,7 +188,7 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
     clearTimeout(flashTimer.current)
     setFlashing(false)
     requestAnimationFrame(() => requestAnimationFrame(() => setFlashing(true)))
-    flashTimer.current = setTimeout(() => setFlashing(false), 600)
+    flashTimer.current = setTimeout(() => setFlashing(false), 900)
   }
 
   const switchTab = useCallback(id => {
@@ -236,7 +232,6 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
       transform: show ? 'translateY(0)' : 'translateY(100%)',
       transition: 'transform 1.4s cubic-bezier(0.16, 1, 0.3, 1)',
     }}>
-      {/* Background */}
       <div style={{
         position: 'absolute', inset: 0,
         backgroundImage: isMobile ? 'none' : `url(${a('/assets/rx7_background.jpg')})`,
@@ -246,25 +241,32 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
       }} />
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.52)' }} />
 
-      {/* Lights flash on tab change */}
       {flashing && (
-        <div key={flashKey.current} style={{
-          position: 'absolute', inset: 0, zIndex: 2,
-          backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
-          backgroundSize: 'cover', backgroundPosition: 'center',
-          mixBlendMode: 'screen', filter: 'brightness(2)',
-          animation: 'lightsFlash 0.3s ease-out forwards',
-          pointerEvents: 'none',
-        }} />
+        <>
+          <div key={`${flashKey.current}-1`} style={{
+            position: 'absolute', inset: 0, zIndex: 2,
+            backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            mixBlendMode: 'screen', filter: 'brightness(2)',
+            animation: 'lightsFlash 0.3s ease-out forwards',
+            pointerEvents: 'none',
+          }} />
+          <div key={`${flashKey.current}-2`} style={{
+            position: 'absolute', inset: 0, zIndex: 2,
+            backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            mixBlendMode: 'screen', filter: 'brightness(2)',
+            animation: 'lightsFlash 0.3s ease-out forwards 0.35s',
+            pointerEvents: 'none',
+          }} />
+        </>
       )}
 
-      {/* Particles background - only during webview with slowed speed */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: show ? 0.4 : 0, transition: 'opacity 0s' }}>
         <SplashParticles slowDown={true} />
       </div>
 
-      {/* RX7 cursor follower - shows with smart z-index hiding behind interactive elements */}
-      <div 
+      <div
         style={{ 
           position: 'absolute', inset: 0, 
           zIndex: rx7ZIndex, pointerEvents: 'none', 
@@ -298,12 +300,10 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
         ))}
       </div>
 
-      {/* Content */}
       <div style={{
         position: 'relative', zIndex: 3,
         display: 'flex', flexDirection: 'column', height: '100%',
       }}>
-        {/* ── V1-style floating navbar ── */}
         <NavBar
           tab={tab}
           switchTab={switchTab}
@@ -312,12 +312,11 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
           isMobile={isMobile}
         />
 
-        {/* Tab content — fixed height, scrollable */}
         <div className="v1-scroll" style={{
           flex: 1, overflowY: 'auto', overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
           paddingTop: isMobile ? 56 : 80,
-          paddingRight: isMobile ? 16 : 48,
+          paddingRight: isMobile ? 16 : 352,
           paddingLeft: isMobile ? 16 : 0,
           paddingBottom: isMobile ? 32 : 0,
         }}>
@@ -328,22 +327,17 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
           </div>
         </div>
 
-        {/* Bottom close — desktop only (mobile has no 3D scene to return to) */}
         {!isMobile && (
           <div onClick={onClose} style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-            padding: '9px 0 13px',
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            cursor: 'pointer', flexShrink: 0,
-            opacity: 0.32, transition: 'opacity 0.2s',
-          }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '0.32'}
-          >
-            <svg width="20" height="11" viewBox="0 0 20 11" fill="none">
-              <path d="M2 2l8 7 8-7" stroke="rgba(255,255,255,0.8)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            position: 'absolute', bottom: 60, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 10, cursor: 'pointer',
+            animation: 'pulse 2s ease-in-out infinite',
+          }}>
+            <svg width="28" height="17" viewBox="0 0 28 17" fill="none">
+              <path d="M2 2l12 13 12-13" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' }}
+              />
             </svg>
-            <span style={{ fontSize: '0.6rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>close</span>
           </div>
         )}
       </div>
@@ -351,7 +345,6 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
   )
 }
 
-// ─── V1-style floating navbar ─────────────────────────────────
 function NavBar({ tab, switchTab, onLogoClick, onClose, isMobile }) {
   const navRef = useRef()
   return (
@@ -393,12 +386,11 @@ function NavBar({ tab, switchTab, onLogoClick, onClose, isMobile }) {
         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
       >
         <img src={a('/assets/navbar_profile_photo.jpg')} alt={profile.name} style={{
-          width: '94%', height: 'auto',
-          position: 'relative', top: isMobile ? '-12px' : '-16px', left: '2px',
+          width: '95%', height: 'auto',
+          position: 'relative', top: isMobile ? '-10px' : '-12px', left: '1px',
         }} />
       </div>
 
-      {/* Nav links */}
       <div style={{ display: 'flex', gap: isMobile ? '0.75rem' : '2rem', alignItems: 'center' }}>
         {NAV_TABS.map(({ id, label }) => {
           const active = tab === id
@@ -447,7 +439,6 @@ function NavBar({ tab, switchTab, onLogoClick, onClose, isMobile }) {
   )
 }
 
-// ─── About ────────────────────────────────────────────────────
 function AboutTab() {
   const [isMobile, setIsMobile] = useState(false)
   
@@ -521,7 +512,6 @@ function AboutTab() {
   )
 }
 
-// ─── Experience ───────────────────────────────────────────────
 function ExperienceTab({ expTab, setExpTab }) {
   const [isMobile, setIsMobile] = useState(false)
   
@@ -536,11 +526,10 @@ function ExperienceTab({ expTab, setExpTab }) {
   const items  = sortExperiences(experiences.filter(e => e.type === expTab))
   return (
     <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16, maxWidth: 700 }}>
         <SubTabBar tabs={EXP_GROUPS} active={expTab} setActive={setExpTab} />
-        {!isMobile && <ResumeButton />}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 700 }}>
         {items.map((item, i) => <ExperienceCard key={i} item={item} accent={group.accent} />)}
       </div>
     </div>
@@ -602,7 +591,6 @@ function ExperienceCard({ item, accent }) {
   )
 }
 
-// ─── Projects ─────────────────────────────────────────────────
 function ProjectsTab({ projTab, setProjTab }) {
   const [isMobile, setIsMobile] = useState(false)
   
@@ -619,7 +607,6 @@ function ProjectsTab({ projTab, setProjTab }) {
     <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
         <SubTabBar tabs={PROJ_GROUPS} active={projTab} setActive={setProjTab} />
-        {!isMobile && <ResumeButton />}
       </div>
       <div style={{
         display: 'grid',
@@ -713,7 +700,6 @@ function ProjectCard({ item, accent }) {
   )
 }
 
-// ─── Shared ───────────────────────────────────────────────────
 function SectionHeading({ children }) {
   return (
     <h2 style={{
@@ -730,7 +716,7 @@ function SectionHeading({ children }) {
 // Each tab in SubTabBar uses its own accent color
 function SubTabBar({ tabs, active, setActive }) {
   return (
-    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flex: 1, marginRight: 20 }}>
+    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flex: 1 }}>
       {tabs.map(({ key, label, accent }) => {
         const isActive = active === key
         return (

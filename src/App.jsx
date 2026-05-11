@@ -119,8 +119,8 @@ function DebugOverlay({ debugInfoRef, carPositions, dragIndex }) {
 const HINTS = [
   { key: '← →',          label: 'cycle'        },
   { key: '↑ ↓',          label: 'web view'     },
-  { key: 'enter / click', label: 'open details' },
-  { key: 'U',             label: 'hide controls' },
+  { key: 'enter', label: 'details' },
+  { key: 'U',             label: 'hide ui' },
 ]
 
 function ControlsHint({ visible }) {
@@ -294,6 +294,13 @@ export default function App() {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // If the window shrinks into mobile range while the 3D scene is active, switch to web view
+  useEffect(() => {
+    if (isMobile && phase !== 'splash' && !portfolioOpen) {
+      setPortfolioOpen(true)
+    }
+  }, [isMobile, phase, portfolioOpen])
 
   const onIntroComplete = useCallback(() => {
     setIntroComplete(true)
@@ -497,7 +504,6 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh', fontFamily: 'Imprima, sans-serif' }}>
 
-      {/* -- 3D Canvas (Desktop only, lazy loaded) -- */}
       {!isMobile && canLoadCanvas && <Canvas
         camera={{ position: CAM_START, fov: 60 }}
         dpr={portfolioOpen ? [0.45, 0.6] : [0.55, 0.8]}
@@ -551,19 +557,15 @@ export default function App() {
         <AdaptiveDpr pixelated />
       </Canvas>}
 
-      {/* -- Debug overlay -- */}
       {debugMode && (
         <DebugOverlay debugInfoRef={debugInfoRef} carPositions={carPositions} dragIndex={dragIndex} />
       )}
 
-      {/* -- Vignette -- */}
       <div style={{
         position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 10,
         background: 'radial-gradient(ellipse at 40% 60%, transparent 22%, rgba(0,0,0,0.78) 100%)',
       }} />
 
-
-      {/* -- Portfolio open lights flash (zIndex between sidebar and portfolio) -- */}
       {portfolioFlashing && (
         <div key={portfolioFlashKey.current} style={{
           position: 'fixed', inset: 0, zIndex: 55, pointerEvents: 'none',
@@ -572,22 +574,18 @@ export default function App() {
         }} />
       )}
 
-      {/* -- Splash overlay: fades out to reveal 3D scene (desktop) or portfolio (mobile) -- */}
-      {<div style={{
+      <div style={{
         position: 'fixed', inset: 0, zIndex: 50,
         pointerEvents: splashDone ? 'none' : 'auto',
         opacity: splashDone ? 0 : 1,
         transition: 'opacity 1.2s ease',
       }}>
-        {/* rx7 photo background */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url(${a('/assets/rx7_background.jpg')})`,
           backgroundSize: 'cover', backgroundPosition: 'center',
         }} />
-        {/* dark overlay */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.52)' }} />
-        {/* pulsing ambient lights - much brighter */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
@@ -596,7 +594,6 @@ export default function App() {
           pointerEvents: 'none',
           animation: 'lightsPulse 2.5s ease-in-out infinite',
         }} />
-        {/* exit flash beep 1 */}
         {splashFlashing && (
           <div key={`${splashFlashKey.current}-1`} style={{
             position: 'absolute', inset: 0, zIndex: 3,
@@ -607,7 +604,6 @@ export default function App() {
             pointerEvents: 'none',
           }} />
         )}
-        {/* exit flash beep 2 */}
         {splashFlashing && (
           <div key={`${splashFlashKey.current}-2`} style={{
             position: 'absolute', inset: 0, zIndex: 3,
@@ -618,10 +614,8 @@ export default function App() {
             pointerEvents: 'none',
           }} />
         )}
-        {/* particles */}
         <SplashParticles />
 
-        {/* Hero — left-aligned desktop, centered mobile */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 1,
           display: 'flex', alignItems: 'center',
@@ -687,7 +681,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Arrow only — no text */}
         <div
           onClick={exitSplash}
           style={{
@@ -702,16 +695,14 @@ export default function App() {
             />
           </svg>
         </div>
-      </div>}
+      </div>
 
       {!splashDone && <SplashKeyListener onEnter={exitSplash} />}
 
-      {/* -- Controls hint (top-left) -- */}
       {splashDone && !portfolioOpen && !isMobile && (
         <ControlsHint visible={showControls} />
       )}
 
-      {/* -- Bottom-left identity -- visible only when sidebar is hidden -- */}
       <div style={{
         position: 'fixed', bottom: 36, left: 44, zIndex: 20,
         display: 'flex', alignItems: 'center', gap: 28,

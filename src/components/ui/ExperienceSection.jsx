@@ -133,19 +133,21 @@ function ExperienceCard({ item, accent, forceExpanded }) {
           </div>
         )}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontFamily: 'Imprima, sans-serif',
-            fontSize: '0.93rem', color: '#fff',
-            letterSpacing: '0.01em', lineHeight: 1.3, marginBottom: 2,
-          }}>
-            {item.role}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 2 }}>
+            <div style={{
+              fontFamily: 'Imprima, sans-serif',
+              fontSize: '0.93rem', color: '#fff',
+              letterSpacing: '0.01em', lineHeight: 1.3,
+            }}>
+              {item.role}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0 }}>
+              <span style={{ fontFamily: 'Imprima, sans-serif', fontSize: '0.68rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>{item.duration}</span>
+              <span style={{ fontFamily: 'Imprima, sans-serif', fontSize: '0.68rem', color: '#ff9361', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>{item.location}</span>
+            </div>
           </div>
-          <div style={{
-            fontFamily: 'Imprima, sans-serif',
-            fontSize: '0.75rem', letterSpacing: '0.03em',
-          }}>
+          <div style={{ fontFamily: 'Imprima, sans-serif', fontSize: '0.75rem', letterSpacing: '0.03em' }}>
             <span style={{ color: accent }}>{item.org}</span>
-            <span style={{ color: 'rgba(255,255,255,0.35)' }}>&nbsp;·&nbsp;{item.duration}</span>
           </div>
         </div>
       </div>
