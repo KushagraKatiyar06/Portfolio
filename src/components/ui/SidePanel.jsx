@@ -374,6 +374,7 @@ function AboutSection({ onLogoClick, resume }) {
           lineHeight: 1.75, marginBottom: 26,
           borderLeft: '2px solid rgba(255,255,255,0.12)',
           paddingLeft: 12,
+          maxWidth: 340,
         }}
         dangerouslySetInnerHTML={{ __html: hlBio(profile.bio) }}
       />

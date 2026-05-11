@@ -268,10 +268,11 @@ export default function App() {
   const manualCloseRef = useRef(false)
   const debugInfoRef   = useRef({ pos: [0, 0, 0], target: [0, 0, 0] })
 
-  const [phase,         setPhase]         = useState('splash')
+  const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768
+  const [phase,         setPhase]         = useState(isMobileInit ? 'intro' : 'splash')
   const [section,       setSection]       = useState('about')
   const [introComplete, setIntroComplete] = useState(false)
-  const [portfolioOpen, setPortfolioOpen] = useState(false)
+  const [portfolioOpen, setPortfolioOpen] = useState(isMobileInit)
   const [panelMode,     setPanelMode]     = useState('hidden')
   const [debugMode,     setDebugMode]     = useState(false)
   const [dragIndex,     setDragIndex]     = useState(null)
@@ -285,12 +286,11 @@ export default function App() {
   const splashFlashKey  = useRef(0)
   const splashExitTimer = useRef(null)
   const canvasLoadTimer = useRef(null)
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(isMobileInit)
   const [canLoadCanvas, setCanLoadCanvas] = useState(false)
-  
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
-    checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
@@ -314,6 +314,11 @@ export default function App() {
   }, [])
 
   const goToSplash = useCallback(() => {
+    if (isMobile) {
+      setSection('about')
+      setPortfolioOpen(true)
+      return
+    }
     clearTimeout(canvasLoadTimer.current)
     clearTimeout(splashExitTimer.current)
     setPhase('splash')
@@ -323,7 +328,7 @@ export default function App() {
     setPortfolioOpen(false)
     setIntroComplete(false)
     setCanLoadCanvas(false)
-  }, [])
+  }, [isMobile])
 
   const exitSplash = useCallback(() => {
     if (phase !== 'splash') return
@@ -460,14 +465,6 @@ export default function App() {
   const splashDone = phase !== 'splash'
   const bioVisible = phase === 'ready' && panelMode === 'hidden'
   
-  useEffect(() => {
-    if (isMobile) {
-      setPortfolioOpen(true)
-      setPhase('intro')
-      setPanelMode('hidden')
-    }
-  }, [isMobile])
-
   return (
     <div style={{ width: '100vw', height: '100vh', fontFamily: 'Imprima, sans-serif' }}>
 
@@ -546,8 +543,8 @@ export default function App() {
         }} />
       )}
 
-      {/* -- Splash overlay: fades out to reveal 3D scene -- */}
-      <div style={{
+      {/* -- Splash overlay: fades out to reveal 3D scene (desktop only) -- */}
+      {!isMobile && <div style={{
         position: 'fixed', inset: 0, zIndex: 50,
         pointerEvents: splashDone ? 'none' : 'auto',
         opacity: splashDone ? 0 : 1,
@@ -659,12 +656,12 @@ export default function App() {
             />
           </svg>
         </div>
-      </div>
+      </div>}
 
       {!splashDone && <SplashKeyListener onEnter={exitSplash} />}
 
       {/* -- Controls hint (top-left) -- */}
-      {splashDone && !portfolioOpen && (
+      {splashDone && !portfolioOpen && !isMobile && (
         <ControlsHint visible={showControls} />
       )}
 
@@ -755,7 +752,7 @@ export default function App() {
         ))}
       </div>
 
-      {splashDone && (
+      {splashDone && !isMobile && (
         <SidePanel
           section={section}
           onSection={s => { setSection(s); manualCloseRef.current = false }}

@@ -134,7 +134,7 @@ export default function ProfilePanel({ visible, onClose }) {
               fontSize: 'clamp(0.85rem, 1.4vw, 1rem)',
               color: 'rgba(255,255,255,0.72)',
               lineHeight: 1.75,
-              maxWidth: 720,
+              maxWidth: 480,
             }}>
               {profile.bio}
             </p>

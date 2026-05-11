@@ -309,15 +309,17 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
           switchTab={switchTab}
           onLogoClick={onLogoClick}
           onClose={onClose}
+          isMobile={isMobile}
         />
 
         {/* Tab content — fixed height, scrollable */}
         <div className="v1-scroll" style={{
           flex: 1, overflowY: 'auto', overflowX: 'hidden',
-          paddingTop: isMobile ? 'clamp(60px, 12vw, 80px)' : 80,
-          paddingRight: isMobile ? '20px' : 48,
-          paddingLeft: isMobile ? '16px' : 0,
-          paddingBottom: isMobile ? '20px' : 0,
+          WebkitOverflowScrolling: 'touch',
+          paddingTop: isMobile ? 56 : 80,
+          paddingRight: isMobile ? 16 : 48,
+          paddingLeft: isMobile ? 16 : 0,
+          paddingBottom: isMobile ? 32 : 0,
         }}>
           <div key={transitionKey} style={{ animation: 'tabFadeIn 0.35s ease-out forwards' }}>
             {tab === 'about'      && <AboutTab />}
@@ -326,41 +328,43 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
           </div>
         </div>
 
-        {/* Bottom close */}
-        <div onClick={onClose} style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-          padding: '9px 0 13px',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-          cursor: 'pointer', flexShrink: 0,
-          opacity: 0.32, transition: 'opacity 0.2s',
-        }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '0.32'}
-        >
-          <svg width="20" height="11" viewBox="0 0 20 11" fill="none">
-            <path d="M2 2l8 7 8-7" stroke="rgba(255,255,255,0.8)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <span style={{ fontSize: '0.6rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>close</span>
-        </div>
+        {/* Bottom close — desktop only (mobile has no 3D scene to return to) */}
+        {!isMobile && (
+          <div onClick={onClose} style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+            padding: '9px 0 13px',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            cursor: 'pointer', flexShrink: 0,
+            opacity: 0.32, transition: 'opacity 0.2s',
+          }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '0.32'}
+          >
+            <svg width="20" height="11" viewBox="0 0 20 11" fill="none">
+              <path d="M2 2l8 7 8-7" stroke="rgba(255,255,255,0.8)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span style={{ fontSize: '0.6rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>close</span>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 // ─── V1-style floating navbar ─────────────────────────────────
-function NavBar({ tab, switchTab, onLogoClick, onClose }) {
+function NavBar({ tab, switchTab, onLogoClick, onClose, isMobile }) {
   const navRef = useRef()
   return (
     <nav
       ref={navRef}
       style={{
-        position: 'absolute', top: '0.65rem',
+        position: 'absolute', top: isMobile ? '0.4rem' : '0.65rem',
         left: '50%', transform: 'translateX(-50%)',
         display: 'flex', flexDirection: 'row',
-        alignItems: 'center', gap: '1.6rem',
+        alignItems: 'center', gap: isMobile ? '0.75rem' : '1.6rem',
         background: 'rgba(0,0,0,0)',
         border: '1px solid rgba(255,255,255,0)',
-        borderRadius: 50, padding: '0.5rem 1.4rem',
+        borderRadius: 50, padding: isMobile ? '0.35rem 0.9rem' : '0.5rem 1.4rem',
         zIndex: 10, transition: 'all 0.4s ease',
         whiteSpace: 'nowrap',
       }}
@@ -375,12 +379,16 @@ function NavBar({ tab, switchTab, onLogoClick, onClose }) {
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      {/* Profile photo → back to splash */}
+      {/* Profile photo → back to splash (desktop) or about tab (mobile) */}
       <div
-        onClick={() => { onLogoClick?.(); onClose() }}
-        title="Back to splash"
+        onClick={() => {
+          if (isMobile) { switchTab('about') }
+          else { onLogoClick?.(); onClose() }
+        }}
+        title={isMobile ? 'About' : 'Back to splash'}
         style={{
-          width: 38, height: 38, borderRadius: '50%', overflow: 'hidden',
+          width: isMobile ? 30 : 38, height: isMobile ? 30 : 38,
+          borderRadius: '50%', overflow: 'hidden',
           boxShadow: '0 0 0 1.5px white', flexShrink: 0,
           cursor: 'pointer', transition: 'transform 0.3s ease',
         }}
@@ -389,19 +397,19 @@ function NavBar({ tab, switchTab, onLogoClick, onClose }) {
       >
         <img src={a('/assets/navbar_profile_photo.jpg')} alt={profile.name} style={{
           width: '94%', height: 'auto',
-          position: 'relative', top: '-16px', left: '2px',
+          position: 'relative', top: isMobile ? '-12px' : '-16px', left: '2px',
         }} />
       </div>
 
       {/* Nav links */}
-      <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: isMobile ? '0.75rem' : '2rem', alignItems: 'center' }}>
         {NAV_TABS.map(({ id, label }) => {
           const active = tab === id
           return (
             <button key={id} onClick={() => switchTab(id)} style={{
               background: 'none', border: 'none', cursor: 'pointer',
               fontFamily: 'Imprima, sans-serif',
-              fontSize: 'clamp(0.82rem, 1.1vw, 1.1rem)',
+              fontSize: isMobile ? '0.82rem' : 'clamp(0.82rem, 1.1vw, 1.1rem)',
               color: active ? '#fff' : 'rgba(255,255,255,0.6)',
               textShadow: active
                 ? '0 0 10px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.3)'
@@ -458,7 +466,7 @@ function AboutTab() {
 
       {/* Badges row + Resume on the right */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : 'space-between', gap: 16, marginBottom: 28, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap' }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {[
             { label: 'Agentic AI Systems',     color: '#b187ff' },
             { label: 'Full Stack Development', color: '#48bcff' },
@@ -485,6 +493,7 @@ function AboutTab() {
           marginBottom: 48,
           borderLeft: '2px solid rgba(255,255,255,0.12)',
           paddingLeft: 18,
+          maxWidth: 'min(520px, 100%)',
         }}
         dangerouslySetInnerHTML={{ __html: hlBio(profile.bio) }}
       />
