@@ -392,8 +392,9 @@ export const projects = {
       name: 'Technical Portfolio',
       subtitle: 'Blender Enviroment + Technical Portfolio',
       image: a('/assets/projects/portfoliocover.png'),
-      live: 'kushagrakatiyar06.github.io/Portfolio-v2',
+      live: 'https://kushagrakatiyar06.github.io/Portfolio-v2/',
       github: 'https://github.com/KushagraKatiyar06/Portfolio-v2',
+      video: 'https://www.youtube.com/watch?v=lsA1zUZcRL0',
       figma: 'https://www.figma.com/design/QWqqPnfRkXt3neiDXrauF1/Portfolio?t=juGwiZwyrqI5RuM9-1',
       stack: [
         { label: 'React',      icon: a('/assets/react.svg') },
@@ -521,8 +522,9 @@ export const projects = {
       name: 'Technical Portfolio',
       subtitle: 'Blender Enviroment + Technical Portfolio',
       image: a('/assets/projects/portfoliocover.png'),
-      live: 'kushagrakatiyar06.github.io/Portfolio-v2',
+      live: 'https://kushagrakatiyar06.github.io/Portfolio-v2/',
       github: 'https://github.com/KushagraKatiyar06/Portfolio-v2',
+      video: 'https://www.youtube.com/watch?v=lsA1zUZcRL0',
       figma: 'https://www.figma.com/design/QWqqPnfRkXt3neiDXrauF1/Portfolio?t=juGwiZwyrqI5RuM9-1',
       stack: [
         { label: 'React',      icon: a('/assets/react.svg') },
