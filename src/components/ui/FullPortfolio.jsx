@@ -122,7 +122,7 @@ const EXP_GROUPS = [
 ]
 
 const PROJ_GROUPS = [
-  { key: 'live',      label: 'Live',      accent: '#48bcff' },
+  { key: 'live',      label: 'Live',      accent: '#4ddf8a' },
   { key: 'technical', label: 'Technical', accent: '#b187ff' },
   { key: 'design',    label: 'Design',    accent: '#ffd166' },
 ]
@@ -203,9 +203,8 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
   useEffect(() => {
     if (!visible) return
     const fn = e => {
-      if (e.key === 'Escape' || e.key === 'ArrowDown') {
-        onClose()
-      } else if (e.key === 'ArrowLeft') {
+      if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab'].includes(e.key)) return
+      if (e.key === 'ArrowLeft') {
         e.preventDefault()
         const tabs = NAV_TABS.map(t => t.id)
         const currentIdx = tabs.indexOf(tab)
@@ -217,6 +216,8 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
         const currentIdx = tabs.indexOf(tab)
         const nextIdx = (currentIdx + 1) % tabs.length
         switchTab(tabs[nextIdx])
+      } else {
+        onClose()
       }
     }
     window.addEventListener('keydown', fn)
@@ -471,7 +472,6 @@ function AboutTab() {
               </span>
             ))}
           </div>
-          <ResumeButton />
         </div>
       )}
 
@@ -480,13 +480,14 @@ function AboutTab() {
         style={{
           fontSize: 'clamp(0.92rem, 1.3vw, 1.05rem)',
           color: 'rgba(255,255,255,0.75)', lineHeight: 1.9,
-          marginBottom: 48,
+          marginBottom: 16,
           borderLeft: '2px solid rgba(255,255,255,0.12)',
           paddingLeft: 18,
           maxWidth: 'min(520px, 100%)',
         }}
         dangerouslySetInnerHTML={{ __html: hlBio(profile.bio) }}
       />
+      <div style={{ marginBottom: 48 }}><ResumeButton /></div>
 
       <SectionHeading>Tech Stack</SectionHeading>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>

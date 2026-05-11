@@ -390,7 +390,12 @@ export default function App() {
       } else if (e.key === 'ArrowDown') {
         closePortfolio()
       } else if (e.key === 'Enter') {
-        handleSceneClick()
+        if (panelMode === 'expanded') {
+          manualCloseRef.current = true
+          setPanelMode('hidden')
+        } else {
+          handleSceneClick()
+        }
       }
     }
     window.addEventListener('keydown', fn)
@@ -573,11 +578,12 @@ export default function App() {
       )}
 
       {/* -- Splash overlay: fades out to reveal 3D scene (desktop) or portfolio (mobile) -- */}
-      {<div style={{
+      {<div onClick={exitSplash} style={{
         position: 'fixed', inset: 0, zIndex: 50,
         pointerEvents: splashDone ? 'none' : 'auto',
         opacity: splashDone ? 0 : 1,
         transition: 'opacity 1.2s ease',
+        cursor: 'pointer',
       }}>
         {/* rx7 photo background */}
         <div style={{

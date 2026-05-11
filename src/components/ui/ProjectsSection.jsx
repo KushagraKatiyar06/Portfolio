@@ -2,7 +2,7 @@ import { projects } from '../../data/portfolio'
 import { a } from '../../utils/asset'
 
 const GROUPS = [
-  { key: 'live',      label: 'Live Projects',      accent: '#48bcff' },
+  { key: 'live',      label: 'Live Projects',      accent: '#4ddf8a' },
   { key: 'technical', label: 'Technical Projects',  accent: '#b187ff' },
   { key: 'design',    label: 'Design Projects',     accent: '#ffd166' },
 ]
