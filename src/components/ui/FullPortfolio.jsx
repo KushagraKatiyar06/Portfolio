@@ -281,19 +281,18 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
       <div style={{
         position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)',
         zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
-        '@media (max-width: 768px)': { display: 'none' },
         ...(isMobile ? { display: 'none' } : {}),
       }}>
         {social.map(({ href, icon, label }) => (
           <a key={label} href={href} target="_blank" rel="noreferrer" title={label}
             style={{ display: 'inline-flex' }}>
             <img src={icon} alt={label} style={{
-              width: 20, height: 20,
-              filter: 'brightness(0) invert(1) drop-shadow(0 0 8px rgba(255,255,255,0.7))',
-              opacity: 0.85, transition: 'filter 0.3s ease, opacity 0.3s ease',
+              width: 26, height: 26,
+              filter: 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.75))',
+              opacity: 1, transition: 'filter 0.3s ease',
             }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 18px rgba(255,255,255,1))' }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 8px rgba(255,255,255,0.7))' }}
+              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 18px rgba(255,255,255,1))' }}
+              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.75))' }}
             />
           </a>
         ))}
@@ -380,13 +379,10 @@ function NavBar({ tab, switchTab, onLogoClick, onClose, isMobile }) {
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      {/* Profile photo → back to splash (desktop) or about tab (mobile) */}
+      {/* Profile photo → back to splash */}
       <div
-        onClick={() => {
-          if (isMobile) { switchTab('about') }
-          else { onLogoClick?.(); onClose() }
-        }}
-        title={isMobile ? 'About' : 'Back to splash'}
+        onClick={() => { onLogoClick?.(); onClose() }}
+        title="Back to splash"
         style={{
           width: isMobile ? 30 : 38, height: isMobile ? 30 : 38,
           borderRadius: '50%', overflow: 'hidden',
@@ -465,26 +461,28 @@ function AboutTab() {
   return (
     <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
 
-      {/* Badges row + Resume on the right */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : 'space-between', gap: 16, marginBottom: 28, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          {[
-            { label: 'Agentic AI Systems',     color: '#b187ff' },
-            { label: 'Full Stack Development', color: '#48bcff' },
-            { label: 'UI/UX Design',           color: '#ffd166' },
-          ].map(({ label, color }) => (
-            <span key={label} style={{
-              fontSize: '0.75rem', letterSpacing: '0.08em', whiteSpace: 'nowrap',
-              color, border: `1px solid ${color}44`, padding: '5px 13px', borderRadius: 4,
-              fontFamily: 'Imprima, sans-serif', textShadow: `0 0 8px ${color}55`,
-              background: `${color}0a`,
-            }}>
-              {label}
-            </span>
-          ))}
+      {/* Badges row + Resume on the right — desktop only */}
+      {!isMobile && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'nowrap' }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {[
+              { label: 'Agentic AI Systems',     color: '#b187ff' },
+              { label: 'Full Stack Development', color: '#48bcff' },
+              { label: 'UI/UX Design',           color: '#ffd166' },
+            ].map(({ label, color }) => (
+              <span key={label} style={{
+                fontSize: '0.75rem', letterSpacing: '0.08em', whiteSpace: 'nowrap',
+                color, border: `1px solid ${color}44`, padding: '5px 13px', borderRadius: 4,
+                fontFamily: 'Imprima, sans-serif', textShadow: `0 0 8px ${color}55`,
+                background: `${color}0a`,
+              }}>
+                {label}
+              </span>
+            ))}
+          </div>
+          <ResumeButton />
         </div>
-        {!isMobile && <ResumeButton />}
-      </div>
+      )}
 
       <SectionHeading>About Me</SectionHeading>
       <p
@@ -573,12 +571,17 @@ function ExperienceCard({ item, accent }) {
           : <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.2)' }}>○</span>}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 'clamp(0.92rem,1.4vw,1.05rem)', color: '#fff', textShadow: '0 0 8px rgba(255,255,255,0.4)', marginBottom: 2 }}>
-          {item.role}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 2 }}>
+          <div style={{ fontSize: 'clamp(0.92rem,1.4vw,1.05rem)', color: '#fff', textShadow: '0 0 8px rgba(255,255,255,0.4)' }}>
+            {item.role}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, flexShrink: 0 }}>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>{item.duration}</span>
+            <span style={{ fontSize: '0.72rem', color: '#ff9361', letterSpacing: '0.03em', whiteSpace: 'nowrap' }}>{item.location}</span>
+          </div>
         </div>
         <div style={{ fontSize: '0.78rem', marginBottom: 12, letterSpacing: '0.03em' }}>
           <span style={{ color: accent }}>{item.org}</span>
-          <span style={{ color: 'rgba(255,255,255,0.38)' }}>&nbsp;·&nbsp;{item.duration}&nbsp;·&nbsp;{item.location}</span>
         </div>
         <ul style={{ margin: '0 0 14px', padding: '0 0 0 16px', color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', lineHeight: 2 }}>
           {item.bullets.map((b, i) => (

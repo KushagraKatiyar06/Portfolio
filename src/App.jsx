@@ -269,10 +269,10 @@ export default function App() {
   const debugInfoRef   = useRef({ pos: [0, 0, 0], target: [0, 0, 0] })
 
   const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768
-  const [phase,         setPhase]         = useState(isMobileInit ? 'intro' : 'splash')
+  const [phase,         setPhase]         = useState('splash')
   const [section,       setSection]       = useState('about')
   const [introComplete, setIntroComplete] = useState(false)
-  const [portfolioOpen, setPortfolioOpen] = useState(isMobileInit)
+  const [portfolioOpen, setPortfolioOpen] = useState(false)
   const [panelMode,     setPanelMode]     = useState('hidden')
   const [debugMode,     setDebugMode]     = useState(false)
   const [dragIndex,     setDragIndex]     = useState(null)
@@ -315,8 +315,8 @@ export default function App() {
 
   const goToSplash = useCallback(() => {
     if (isMobile) {
-      setSection('about')
-      setPortfolioOpen(true)
+      setPortfolioOpen(false)
+      setPhase('splash')
       return
     }
     clearTimeout(canvasLoadTimer.current)
@@ -332,6 +332,11 @@ export default function App() {
 
   const exitSplash = useCallback(() => {
     if (phase !== 'splash') return
+    if (isMobile) {
+      setPhase('ready')
+      setPortfolioOpen(true)
+      return
+    }
     splashFlashKey.current++
     setSplashFlashing(false)
     clearTimeout(canvasLoadTimer.current)
@@ -342,7 +347,7 @@ export default function App() {
       setPhase('intro')
       setCanLoadCanvas(true)
     }, 400)
-  }, [phase])
+  }, [phase, isMobile])
 
   const cycleMode = useCallback(() => {
     setPanelMode(m => {
@@ -462,6 +467,30 @@ export default function App() {
     return () => window.removeEventListener('wheel', fn)
   }, [dragIndex])
 
+  // Scroll/swipe down on splash triggers same action as the arrow
+  useEffect(() => {
+    if (phase !== 'splash') return
+
+    const onWheel = e => {
+      if (e.deltaY > 20) exitSplash()
+    }
+
+    let touchStartY = 0
+    const onTouchStart = e => { touchStartY = e.touches[0].clientY }
+    const onTouchEnd   = e => {
+      if (touchStartY - e.changedTouches[0].clientY > 40) exitSplash()
+    }
+
+    window.addEventListener('wheel',      onWheel,      { passive: true })
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchend',   onTouchEnd,   { passive: true })
+    return () => {
+      window.removeEventListener('wheel',      onWheel)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchend',   onTouchEnd)
+    }
+  }, [phase, exitSplash])
+
   const splashDone = phase !== 'splash'
   const bioVisible = phase === 'ready' && panelMode === 'hidden'
   
@@ -543,8 +572,8 @@ export default function App() {
         }} />
       )}
 
-      {/* -- Splash overlay: fades out to reveal 3D scene (desktop only) -- */}
-      {!isMobile && <div style={{
+      {/* -- Splash overlay: fades out to reveal 3D scene (desktop) or portfolio (mobile) -- */}
+      {<div style={{
         position: 'fixed', inset: 0, zIndex: 50,
         pointerEvents: splashDone ? 'none' : 'auto',
         opacity: splashDone ? 0 : 1,
@@ -592,31 +621,46 @@ export default function App() {
         {/* particles */}
         <SplashParticles />
 
-        {/* Hero — left-aligned, v1 style */}
+        {/* Hero — left-aligned desktop, centered mobile */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 1,
-          display: 'flex', alignItems: 'center', paddingLeft: '10vw',
+          display: 'flex', alignItems: 'center',
+          justifyContent: isMobile ? 'center' : 'flex-start',
+          paddingLeft: isMobile ? 0 : '10vw',
+          paddingRight: isMobile ? 0 : 0,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 30 }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: 'center',
+            gap: isMobile ? 20 : 30,
+            textAlign: isMobile ? 'center' : 'left',
+          }}>
             <div style={{
-              width: 200, height: 200, borderRadius: '50%', overflow: 'hidden',
+              width: isMobile ? 130 : 200, height: isMobile ? 130 : 200,
+              borderRadius: '50%', overflow: 'hidden',
               boxShadow: '0 0 0 2px white', flexShrink: 0,
             }}>
               <img src={a('/assets/profile_picture_landing.jpg')} alt={profile.name} style={{
                 width: '120%', height: 'auto',
-                position: 'relative', top: '-106px', left: '-5px',
+                position: 'relative',
+                top: isMobile ? '-68px' : '-106px',
+                left: '-5px',
               }} />
             </div>
             <div>
               <h1 style={{
-                fontFamily: 'Imprima, sans-serif', fontSize: 'clamp(2.25rem, 4vw, 3rem)',
+                fontFamily: 'Imprima, sans-serif',
+                fontSize: isMobile ? 'clamp(1.7rem, 7vw, 2.2rem)' : 'clamp(2.25rem, 4vw, 3rem)',
                 color: '#fff', textShadow: '0 0 8px rgba(255,255,255,0.8)',
                 margin: '0 0 12px', lineHeight: 1.1,
               }}>
                 {profile.name}
               </h1>
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 10,
+                display: 'flex', alignItems: 'center',
+                justifyContent: isMobile ? 'center' : 'flex-start',
+                gap: 10,
                 color: 'rgba(255,255,255,0.72)', fontFamily: 'Imprima, sans-serif',
                 fontSize: 'clamp(0.85rem, 1.4vw, 1rem)', marginBottom: 8,
               }}>
@@ -627,7 +671,9 @@ export default function App() {
                 {profile.title}
               </div>
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 10,
+                display: 'flex', alignItems: 'center',
+                justifyContent: isMobile ? 'center' : 'flex-start',
+                gap: 10,
                 color: 'rgba(255,255,255,0.5)', fontFamily: 'Imprima, sans-serif',
                 fontSize: 'clamp(0.82rem, 1.2vw, 0.95rem)',
               }}>
@@ -761,6 +807,7 @@ export default function App() {
           onCycleMode={cycleMode}
           onManualClose={closeSidebarManually}
           onLogoClick={goToSplash}
+          showControls={showControls}
         />
       )}
 

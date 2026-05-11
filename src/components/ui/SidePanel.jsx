@@ -49,7 +49,7 @@ const NAV_ITEMS = [
   { id: 'projects',   label: 'Projects'   },
 ]
 
-export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose, onLogoClick }) {
+export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose, onLogoClick, showControls }) {
   const [rendered,      setRendered]  = useState(section)
   const [transitionKey, setTransKey]  = useState(0)
   const [flashing,      setFlashing]  = useState(false)
@@ -138,8 +138,9 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
           borderRadius: '6px 0 0 6px',
           cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          pointerEvents: 'auto',
-          transition: 'background 0.2s, border-color 0.2s',
+          pointerEvents: open || showControls ? 'auto' : 'none',
+          opacity: open || showControls ? 1 : 0,
+          transition: 'background 0.2s, border-color 0.2s, opacity 0.25s ease',
         }}
         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)' }}
         onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)' }}
