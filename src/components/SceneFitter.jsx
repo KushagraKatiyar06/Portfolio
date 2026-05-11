@@ -69,7 +69,7 @@ export default function SceneFitter({ garageUrl, carUrl, carId, onFitGarage, onF
     console.log('[Auto-fit]', { px: px.toFixed(2), py: py.toFixed(2), pz: pz.toFixed(2), scale: scale.toFixed(4) })
 
     onFitCar(carId, { px, py, pz, ry: 0, scale })
-  }, [carScene, carId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [carScene, carId]) 
 
   return null
 }

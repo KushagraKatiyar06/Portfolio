@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { profile, social, skills, experiences, projects } from '../../data/portfolio'
 import { a } from '../../utils/asset'
 import SplashParticles from './SplashParticles'
@@ -162,6 +162,7 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
   const [flashing,     setFlashing]     = useState(false)
   const [transitionKey, setTransKey]   = useState(0)
   const [isMobile,     setIsMobile]    = useState(false)
+  const [rx7ZIndex,    setRx7ZIndex]   = useState(1)
   const flashTimer = useRef(null)
   const flashKey = useRef(0)
 
@@ -186,15 +187,6 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible])
 
-  useEffect(() => {
-    if (!visible) return
-    const fn = e => {
-      if (e.key === 'Escape' || e.key === 'ArrowDown') onClose()
-    }
-    window.addEventListener('keydown', fn)
-    return () => window.removeEventListener('keydown', fn)
-  }, [visible, onClose])
-
   function triggerFlash() {
     flashKey.current++
     clearTimeout(flashTimer.current)
@@ -203,13 +195,37 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
     flashTimer.current = setTimeout(() => setFlashing(false), 600)
   }
 
-  const switchTab = id => {
+  const switchTab = useCallback(id => {
     if (id === tab) return
     triggerFlash()
     setTab(id)
     setTransKey(k => k + 1)
+    setRx7ZIndex(1)
     onSection?.(id)
-  }
+  }, [tab, onSection])
+
+  useEffect(() => {
+    if (!visible) return
+    const fn = e => {
+      if (e.key === 'Escape' || e.key === 'ArrowDown') {
+        onClose()
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        const tabs = NAV_TABS.map(t => t.id)
+        const currentIdx = tabs.indexOf(tab)
+        const nextIdx = (currentIdx - 1 + tabs.length) % tabs.length
+        switchTab(tabs[nextIdx])
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        const tabs = NAV_TABS.map(t => t.id)
+        const currentIdx = tabs.indexOf(tab)
+        const nextIdx = (currentIdx + 1) % tabs.length
+        switchTab(tabs[nextIdx])
+      }
+    }
+    window.addEventListener('keydown', fn)
+    return () => window.removeEventListener('keydown', fn)
+  }, [visible, onClose, tab, switchTab])
 
   if (!inDom) return null
 
@@ -242,14 +258,23 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
         }} />
       )}
 
-      {/* Particles background */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: show ? 0.4 : 0, transition: 'opacity 0.8s ease' }}>
-        <SplashParticles />
+      {/* Particles background - only during webview with slowed speed */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: show ? 0.4 : 0, transition: 'opacity 0s' }}>
+        <SplashParticles slowDown={true} />
       </div>
 
-      {/* RX7 cursor follower */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', opacity: show ? 0.7 : 0, transition: 'opacity 0.8s ease' }}>
-        <Rx7CursorFollower visible={show} />
+      {/* RX7 cursor follower - shows with smart z-index hiding behind interactive elements */}
+      <div 
+        style={{ 
+          position: 'absolute', inset: 0, 
+          zIndex: rx7ZIndex, pointerEvents: 'none', 
+          opacity: show ? 0.65 : 0, 
+          transition: 'opacity 0.2s ease, z-index 0.1s ease' 
+        }}
+        onMouseEnter={() => setRx7ZIndex(-1)}
+        onMouseLeave={() => setRx7ZIndex(1)}
+      >
+        <Rx7CursorFollower visible={show} canLoad={true} />
       </div>
 
       {/* Social column — right (hidden on mobile) */}

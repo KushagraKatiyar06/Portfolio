@@ -291,6 +291,7 @@ export default function App() {
   const [splashFlashing,  setSplashFlashing]  = useState(false)
   const splashFlashKey  = useRef(0)
   const splashExitTimer = useRef(null)
+  const canvasLoadTimer = useRef(null)
   const [isMobile, setIsMobile] = useState(false)
   const [canLoadCanvas, setCanLoadCanvas] = useState(false)
   
@@ -308,6 +309,7 @@ export default function App() {
   }, [])
 
   const openPortfolio = useCallback(() => {
+    clearTimeout(canvasLoadTimer.current)
     setPortfolioOpen(true)
     manualCloseRef.current = true
     setPanelMode('hidden')
@@ -315,11 +317,15 @@ export default function App() {
 
   const closePortfolio = useCallback(() => {
     setPortfolioOpen(false)
-    setCanLoadCanvas(true)
+    // Delay Canvas loading until after portfolio fade (1.4s transition + buffer)
+    clearTimeout(canvasLoadTimer.current)
+    canvasLoadTimer.current = setTimeout(() => setCanLoadCanvas(true), 1500)
   }, [])
 
   // Going to splash always resets intro so the camera drop plays again
   const goToSplash = useCallback(() => {
+    clearTimeout(canvasLoadTimer.current)
+    clearTimeout(splashExitTimer.current)
     setPhase('splash')
     setSection('about')
     setPanelMode('normal')
@@ -333,12 +339,13 @@ export default function App() {
     if (phase !== 'splash') return
     splashFlashKey.current++
     setSplashFlashing(false)
-    setCanLoadCanvas(true)
+    clearTimeout(canvasLoadTimer.current)
     requestAnimationFrame(() => requestAnimationFrame(() => setSplashFlashing(true)))
     clearTimeout(splashExitTimer.current)
     splashExitTimer.current = setTimeout(() => {
       setSplashFlashing(false)
       setPhase('intro')
+      setCanLoadCanvas(true)
     }, 400)
   }, [phase])
 
@@ -368,7 +375,7 @@ export default function App() {
     }
   }, [debugMode, phase, portfolioOpen, panelMode])
 
-  // Arrow key + Enter navigation (reversed cycling)
+  // Arrow key + Enter navigation
   useEffect(() => {
     const fn = e => {
       if (phase !== 'ready') return
@@ -377,9 +384,9 @@ export default function App() {
         return
       }
       if (e.key === 'ArrowLeft') {
-        setSection(s => SECTIONS[(SECTIONS.indexOf(s) + 1) % SECTIONS.length])
-      } else if (e.key === 'ArrowRight') {
         setSection(s => SECTIONS[(SECTIONS.indexOf(s) - 1 + SECTIONS.length) % SECTIONS.length])
+      } else if (e.key === 'ArrowRight') {
+        setSection(s => SECTIONS[(SECTIONS.indexOf(s) + 1) % SECTIONS.length])
       } else if (e.key === 'ArrowUp') {
         openPortfolio()
       } else if (e.key === 'ArrowDown') {
@@ -487,9 +494,9 @@ export default function App() {
       {/* -- 3D Canvas (Desktop only, lazy loaded) -- */}
       {!isMobile && canLoadCanvas && <Canvas
         camera={{ position: CAM_START, fov: 60 }}
-        dpr={portfolioOpen ? [0.5, 0.7] : [0.5, 1]}
-        gl={{ powerPreference: 'high-performance', antialias: true }}
-        performance={{ min: 0.5 }}
+        dpr={portfolioOpen ? [0.45, 0.6] : [0.55, 0.8]}
+        gl={{ powerPreference: 'high-performance', antialias: false, logarithmicDepthBuffer: false }}
+        performance={{ min: 0.25, max: 0.6 }}
         onClick={handleSceneClick}
         style={{
           width: '100%',
@@ -497,9 +504,9 @@ export default function App() {
         }}
       >
         <color attach="background" args={['#0d0d0d']} />
-        <fog attach="fog" args={['#0d0d0d', 1.5, 4]} />
-        <ambientLight intensity={2} />
-        <directionalLight position={[0, 2, 1]} intensity={2} />
+        <fog attach="fog" args={['#0d0d0d', 1.4, 3.8]} />
+        <ambientLight intensity={1.8} />
+        <directionalLight position={[0, 2, 1]} intensity={1.8} />
         <Suspense fallback={null}>
           <Environment preset="warehouse" background={false} />
           <Garage url={garageUrl} />
@@ -549,23 +556,12 @@ export default function App() {
         background: 'radial-gradient(ellipse at 40% 60%, transparent 22%, rgba(0,0,0,0.78) 100%)',
       }} />
 
-      {/* -- Ambient landing lights — subtle always-on glow -- */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 11, pointerEvents: 'none',
-        backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
-        backgroundSize: 'cover', backgroundPosition: 'center',
-        filter: 'brightness(2)', mixBlendMode: 'screen',
-        opacity: introComplete && !portfolioOpen ? 0.07 : 0,
-        transition: 'opacity 2s ease',
-      }} />
 
       {/* -- Portfolio open lights flash (zIndex between sidebar and portfolio) -- */}
       {portfolioFlashing && (
         <div key={portfolioFlashKey.current} style={{
           position: 'fixed', inset: 0, zIndex: 55, pointerEvents: 'none',
-          backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
-          backgroundSize: 'cover', backgroundPosition: 'center',
-          mixBlendMode: 'screen', filter: 'brightness(2)',
+          background: 'rgba(0,0,0,0)',
           animation: 'lightsFlash 1.6s ease-out forwards',
         }} />
       )}
@@ -585,12 +581,12 @@ export default function App() {
         }} />
         {/* dark overlay */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.52)' }} />
-        {/* pulsing ambient lights */}
+        {/* pulsing ambient lights - much brighter */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
           backgroundSize: 'cover', backgroundPosition: 'center',
-          filter: 'brightness(2)', mixBlendMode: 'screen',
+          filter: 'brightness(4.2)', mixBlendMode: 'screen',
           pointerEvents: 'none',
           animation: 'lightsPulse 2.5s ease-in-out infinite',
         }} />
@@ -691,11 +687,6 @@ export default function App() {
       {splashDone && !portfolioOpen && (
         <ControlsHint visible={showControls} />
       )}
-
-      {/* -- RX7 cursor follower -- */}
-      <Rx7CursorFollower
-        visible={phase === 'splash'}
-      />
 
       {/* -- Bottom-left identity -- visible only when sidebar is hidden -- */}
       <div style={{

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export default function SplashParticles() {
+export default function SplashParticles({ slowDown = false }) {
   const canvasRef = useRef()
 
   useEffect(() => {
@@ -12,10 +12,11 @@ export default function SplashParticles() {
     let w = (canvas.width  = window.innerWidth)
     let h = (canvas.height = window.innerHeight)
 
-    const count = Math.min(180, Math.max(75, Math.floor(w / 12)))
+    const count = Math.min(100, Math.max(45, Math.floor(w / 18)))
+    const speed = slowDown ? 0.5 : 1
     const pts = Array.from({ length: count }, () => ({
       x: rand(0, w), y: rand(0, h),
-      vx: rand(-0.42, 0.42), vy: rand(-0.32, 0.32),
+      vx: rand(-0.42, 0.42) * speed, vy: rand(-0.32, 0.32) * speed,
       r: rand(0.9, 3.2), a: rand(0.28, 0.72),
     }))
 

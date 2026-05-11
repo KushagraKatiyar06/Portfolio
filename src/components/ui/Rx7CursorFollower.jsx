@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { a } from '../../utils/asset'
 
-export default function Rx7CursorFollower({ visible }) {
+export default function Rx7CursorFollower({ visible, canLoad = true }) {
   const spriteRef = useRef()
   const stateRef  = useRef(null)
 
@@ -75,7 +75,7 @@ export default function Rx7CursorFollower({ visible }) {
         position: 'fixed', top: 0, left: 0,
         width: 'clamp(95px, 9vw, 165px)', height: 'auto',
         willChange: 'transform',
-        opacity: visible ? 0.85 : 0,
+        opacity: visible && canLoad ? 0.85 : 0,
         filter: 'drop-shadow(0 0 16px rgba(255,255,255,0.35))',
         pointerEvents: 'none',
         zIndex: 998,

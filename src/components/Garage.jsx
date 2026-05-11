@@ -6,10 +6,10 @@ export default function Garage({ url }) {
 
   useEffect(() => {
     scene.traverse(child => {
-      // Garage is static — no shadow maps, no unnecessary per-frame CPU checks
+
       child.castShadow = false
       child.receiveShadow = false
-      // Frustum culling stays on (default true) so off-screen parts skip the GPU
+
     })
   }, [scene])
 
