@@ -140,6 +140,25 @@ export const experiences = [
   },
   {
     type: 'experience',
+    org: 'Primo Brands',
+    role: 'AI & Digital Experience Intern',
+    duration: 'May 2026 – Present',
+    location: 'Tampa, Florida',
+    logo: a('/assets/orgs/primobrands.jpg'),
+    bullets: [
+      'Building enterprise internal web tooling to automate IT workflows, serving cross-functional teams.',
+      'Designing user-facing interfaces for knowledge retrieval, collaborating with stakeholders on requirements.',
+      'Enforcing data validation using Pydantic, ensuring consistent and reliable outputs across internal tools.',
+      'Presenting tooling evaluations and feature recommendations to senior leadership.',
+    ],
+    stack: [
+      { label: 'Python',     icon: a('/assets/python.svg') },
+      { label: 'React',      icon: a('/assets/react.svg') },
+      { label: 'TypeScript', icon: a('/assets/typescript.svg') },
+    ],
+  },
+  {
+    type: 'experience',
     org: 'Virtual Learning Lab',
     role: 'Undergraduate Research Assistant',
     duration: 'January 2026 – Present',

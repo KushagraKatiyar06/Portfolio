@@ -330,10 +330,15 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
 
         {!isMobile && (
           <div onClick={onClose} style={{
-            position: 'absolute', bottom: 60, left: '50%', transform: 'translateX(-50%)',
+            position: 'absolute', bottom: 44, left: '50%', transform: 'translateX(-50%)',
             zIndex: 10, cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
             animation: 'pulse 2s ease-in-out infinite',
           }}>
+            <span style={{
+              color: 'rgba(255,255,255,0.5)', fontFamily: 'Imprima, sans-serif',
+              fontSize: '0.66rem', letterSpacing: '0.09em',
+            }}>3D view</span>
             <svg width="28" height="17" viewBox="0 0 28 17" fill="none">
               <path d="M2 2l12 13 12-13" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                 style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' }}

@@ -106,8 +106,8 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
     document.addEventListener('mouseup',   onUp)
   }
 
-  const chevronLeft  = <path d="M8 2L4 6l4 4" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  const chevronRight = <path d="M4 2l4 4-4 4" stroke="rgba(255,255,255,0.75)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  const chevronLeft  = <path d="M8 2L4 6l4 4" stroke="rgba(255,255,255,0.85)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  const chevronRight = <path d="M4 2l4 4-4 4" stroke="rgba(255,255,255,0.85)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
 
   return (
     <div
@@ -125,29 +125,38 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
       {/* Left-edge toggle tab */}
       <button
         onClick={onCycleMode}
-        title={panelMode === 'normal' ? 'Expand' : panelMode === 'expanded' ? 'Close' : 'Open'}
+        title={panelMode === 'normal' ? 'Expand panel' : panelMode === 'expanded' ? 'Close panel' : 'Open details panel'}
         style={{
-          position: 'absolute', left: -32, top: '50%',
+          position: 'absolute', left: open ? -36 : -42, top: '50%',
           transform: 'translateY(-50%)',
-          width: 32, height: 72,
-          background: 'rgba(0,0,0,0.6)',
+          width: open ? 36 : 42, height: open ? 72 : 88,
+          background: open ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.78)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.12)',
+          border: '1px solid rgba(255,255,255,0.15)',
           borderRight: 'none',
-          borderRadius: '6px 0 0 6px',
+          borderRadius: '8px 0 0 8px',
           cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
           pointerEvents: open || showControls ? 'auto' : 'none',
           opacity: open || showControls ? 1 : 0,
-          transition: 'background 0.2s, border-color 0.2s, opacity 0.25s ease',
+          transition: 'background 0.2s, border-color 0.2s, opacity 0.25s ease, width 0.3s ease, height 0.3s ease, left 0.3s ease',
+          animation: !open && showControls ? 'sidebarTabPulse 2.5s ease-in-out infinite' : 'none',
         }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)' }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)' }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = open ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.78)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)' }}
       >
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
           {panelMode === 'expanded' ? chevronRight : chevronLeft}
         </svg>
+        {!open && (
+          <span style={{
+            fontSize: '0.5rem', letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.4)', fontFamily: 'Imprima, sans-serif',
+            writingMode: 'vertical-rl', transform: 'rotate(180deg)',
+            userSelect: 'none',
+          }}>details</span>
+        )}
       </button>
 
       <div style={{

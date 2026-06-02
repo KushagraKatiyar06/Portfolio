@@ -123,6 +123,172 @@ const HINTS = [
   { key: 'U',            label: 'hide ui' },
 ]
 
+function ViewChooser({ visible, onChoose3D, onChooseWeb }) {
+  const [hovered, setHovered] = useState(null)
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 52,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      pointerEvents: visible ? 'auto' : 'none',
+      opacity: visible ? 1 : 0,
+      transition: 'opacity 0.55s ease',
+      background: 'rgba(8,8,8,0.88)',
+    }}>
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 44,
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.6s ease 0.15s, transform 0.6s ease 0.15s',
+        transform: visible ? 'translateY(0)' : 'translateY(12px)',
+      }}>
+        <div style={{
+          color: 'rgba(255,255,255,0.38)', fontFamily: 'Imprima, sans-serif',
+          fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase',
+        }}>
+          choose your experience
+        </div>
+
+        <div style={{ display: 'flex', gap: 20 }}>
+          {/* 3D Portfolio */}
+          <button
+            onClick={onChoose3D}
+            onMouseEnter={() => setHovered('three')}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              background: hovered === 'three' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.025)',
+              border: `1px solid ${hovered === 'three' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)'}`,
+              borderRadius: 14, padding: '36px 44px',
+              cursor: 'pointer', transition: 'all 0.22s ease',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18,
+              transform: hovered === 'three' ? 'translateY(-4px)' : 'translateY(0)',
+              boxShadow: hovered === 'three' ? '0 8px 32px rgba(255,255,255,0.05)' : 'none',
+              minWidth: 210, minHeight: 220,
+            }}
+          >
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.82)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
+              <line x1="12" y1="2" x2="12" y2="22"/>
+              <polyline points="22 8.5 12 15 2 8.5"/>
+            </svg>
+            <div style={{ color: '#fff', fontFamily: 'Imprima, sans-serif', fontSize: '1.05rem' }}>
+              3D Portfolio
+            </div>
+            <div style={{
+              color: 'rgba(255,185,60,0.9)', fontFamily: 'Imprima, sans-serif',
+              fontSize: '0.68rem', textAlign: 'center', lineHeight: 1.6,
+              maxWidth: 148, minHeight: 36,
+              opacity: hovered === 'three' ? 1 : 0,
+              transition: 'opacity 0.2s ease',
+            }}>
+              Best with a capable GPU &amp; modern browser
+            </div>
+          </button>
+
+          {/* Web View */}
+          <button
+            onClick={onChooseWeb}
+            onMouseEnter={() => setHovered('web')}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              background: hovered === 'web' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.025)',
+              border: `1px solid ${hovered === 'web' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)'}`,
+              borderRadius: 14, padding: '36px 44px',
+              cursor: 'pointer', transition: 'all 0.22s ease',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18,
+              transform: hovered === 'web' ? 'translateY(-4px)' : 'translateY(0)',
+              boxShadow: hovered === 'web' ? '0 8px 32px rgba(255,255,255,0.05)' : 'none',
+              minWidth: 210, minHeight: 220,
+            }}
+          >
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.82)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="18" rx="2"/>
+              <line x1="2" y1="9" x2="22" y2="9"/>
+              <circle cx="5.5" cy="6" r="0.9" fill="rgba(255,255,255,0.82)" stroke="none"/>
+              <circle cx="8.8" cy="6" r="0.9" fill="rgba(255,255,255,0.82)" stroke="none"/>
+            </svg>
+            <div style={{ color: '#fff', fontFamily: 'Imprima, sans-serif', fontSize: '1.05rem' }}>
+              Web View
+            </div>
+            <div style={{
+              color: 'rgba(100,225,140,0.9)', fontFamily: 'Imprima, sans-serif',
+              fontSize: '0.68rem', textAlign: 'center', lineHeight: 1.6,
+              maxWidth: 148, minHeight: 36,
+              opacity: hovered === 'web' ? 1 : 0,
+              transition: 'opacity 0.2s ease',
+            }}>
+              Lighter, runs smoothly on any device
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ControlsAnimation({ visible }) {
+  const [stage,   setStage]   = useState('col')
+  const [opacity, setOpacity] = useState(0)
+  const timers = useRef([])
+
+  useEffect(() => {
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+    if (!visible) { setStage('col'); setOpacity(0); return }
+    setStage('col'); setOpacity(0)
+    timers.current.push(
+      setTimeout(() => setOpacity(1),            30),    // fade in as column
+      setTimeout(() => setStage('row'),        1100),    // switch to row (still centered)
+      setTimeout(() => setStage('corner'),     1900),    // slide to corner
+      setTimeout(() => setOpacity(0),          2000),    // fade out during slide
+    )
+    return () => timers.current.forEach(clearTimeout)
+  }, [visible])
+
+  const isCol    = stage === 'col'
+  const isCorner = stage === 'corner'
+
+  return (
+    <div style={{
+      position:  'fixed',
+      top:       isCorner ? 20     : '50%',
+      left:      isCorner ? 24     : '50%',
+      transform: isCorner ? 'none' : 'translate(-50%, -50%)',
+      zIndex: 35,
+      display: 'flex',
+      flexDirection:  isCol ? 'column' : 'row',
+      alignItems:     isCol ? 'flex-start' : 'center',
+      gap:            isCol ? 12 : 20,
+      opacity,
+      color: '#fff', fontFamily: 'Imprima, sans-serif',
+      pointerEvents: 'none', userSelect: 'none', letterSpacing: '0.03em',
+      transition: isCol
+        ? 'opacity 0.35s ease'
+        : 'top 0.75s cubic-bezier(0.4,0,0.2,1), left 0.75s cubic-bezier(0.4,0,0.2,1), transform 0.75s ease, opacity 0.4s ease',
+    }}>
+      {!isCol && !isCorner && (
+        <div style={{ opacity: 0.3, fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: 4 }}>
+          controls
+        </div>
+      )}
+      {isCol && (
+        <div style={{ opacity: 0.3, fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+          controls
+        </div>
+      )}
+      {HINTS.map(({ key, label }) => (
+        <span key={key} style={{
+          display: 'flex', alignItems: 'center',
+          gap:      isCol ? 12 : 6,
+          fontSize: isCol ? '0.95rem' : '0.75rem',
+          transition: 'font-size 0.35s ease, gap 0.35s ease',
+        }}>
+          <span style={{ opacity: 0.5, fontFamily: '"Courier New", monospace', fontSize: isCol ? '0.85rem' : '0.7rem' }}>{key}</span>
+          <span style={{ opacity: 0.85 }}>{label}</span>
+        </span>
+      ))}
+    </div>
+  )
+}
+
 function ControlsHint({ visible }) {
   if (!visible) return null
   return (
@@ -281,6 +447,10 @@ export default function App() {
   const [portfolioFlashing, setPortfolioFlashing] = useState(false)
   const portfolioFlashKey   = useRef(0)
   const portfolioFlashTimer = useRef(null)
+  const [controlsAnimating, setControlsAnimating] = useState(false)
+  const controlsAnimTimer = useRef(null)
+  const [topFlashing, setTopFlashing] = useState(false)
+  const topFlashTimer = useRef(null)
 
   const [splashFlashing,  setSplashFlashing]  = useState(false)
   const splashFlashKey  = useRef(0)
@@ -344,10 +514,31 @@ export default function App() {
     clearTimeout(splashExitTimer.current)
     splashExitTimer.current = setTimeout(() => {
       setSplashFlashing(false)
-      setPhase('intro')
-      setCanLoadCanvas(true)
+      setPhase('chooser')
     }, 400)
   }, [phase, isMobile])
+
+  const choose3D = useCallback(() => {
+    setTopFlashing(false)
+    clearTimeout(topFlashTimer.current)
+    requestAnimationFrame(() => requestAnimationFrame(() => setTopFlashing(true)))
+    topFlashTimer.current = setTimeout(() => {
+      setTopFlashing(false)
+      setPhase('intro')
+      setCanLoadCanvas(true)
+    }, 420)
+  }, [])
+
+  const chooseWeb = useCallback(() => {
+    setTopFlashing(false)
+    clearTimeout(topFlashTimer.current)
+    requestAnimationFrame(() => requestAnimationFrame(() => setTopFlashing(true)))
+    topFlashTimer.current = setTimeout(() => {
+      setTopFlashing(false)
+      setPhase('ready')
+      setPortfolioOpen(true)
+    }, 420)
+  }, [])
 
   const cycleMode = useCallback(() => {
     setPanelMode(m => {
@@ -472,6 +663,15 @@ export default function App() {
     return () => window.removeEventListener('wheel', fn)
   }, [dragIndex])
 
+  // Controls center-flash animation when first entering 3D
+  useEffect(() => {
+    if (phase === 'ready') {
+      setControlsAnimating(true)
+      controlsAnimTimer.current = setTimeout(() => setControlsAnimating(false), 2800)
+    }
+    return () => clearTimeout(controlsAnimTimer.current)
+  }, [phase])
+
   // Scroll/swipe down on splash triggers same action as the arrow
   useEffect(() => {
     if (phase !== 'splash') return
@@ -567,6 +767,24 @@ export default function App() {
         background: 'radial-gradient(ellipse at 40% 60%, transparent 22%, rgba(0,0,0,0.78) 100%)',
       }} />
 
+
+      {/* -- View chooser (desktop: between splash and 3D) -- */}
+      <ViewChooser
+        visible={phase === 'chooser'}
+        onChoose3D={choose3D}
+        onChooseWeb={chooseWeb}
+      />
+
+      {/* -- Top-level flash for chooser transitions -- */}
+      {topFlashing && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 65, pointerEvents: 'none',
+          backgroundImage: `url(${a('/assets/rx7_lights_background.png')})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          filter: 'brightness(2.2)', mixBlendMode: 'screen',
+          animation: 'lightsFlash 0.35s ease-out forwards',
+        }} />
+      )}
 
       {/* -- Portfolio open lights flash (zIndex between sidebar and portfolio) -- */}
       {portfolioFlashing && (
@@ -712,9 +930,39 @@ export default function App() {
 
       {!splashDone && <SplashKeyListener onEnter={exitSplash} />}
 
-      {/* -- Controls hint (top-left) -- */}
-      {splashDone && !portfolioOpen && !isMobile && (
+      {/* -- Controls hint: column → row → slides to corner -- */}
+      {controlsAnimating && showControls && !portfolioOpen && !isMobile && (
+        <ControlsAnimation visible={controlsAnimating} />
+      )}
+
+      {/* -- Controls hint (top-left, corner) -- */}
+      {phase === 'ready' && !portfolioOpen && !isMobile && (
         <ControlsHint visible={showControls} />
+      )}
+
+      {/* -- Pulsing web-view arrow (bottom center, 3D mode) -- */}
+      {phase === 'ready' && !portfolioOpen && !isMobile && (
+        <div
+          onClick={openPortfolio}
+          style={{
+            position: 'fixed', bottom: 44, left: '50%', zIndex: 25,
+            cursor: 'pointer', userSelect: 'none',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
+            animation: 'pulseWebView 2.2s ease-in-out infinite',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '1' }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '' }}
+        >
+          <svg width="22" height="14" viewBox="0 0 28 17" fill="none">
+            <path d="M2 15l12-13 12 13" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))' }}
+            />
+          </svg>
+          <span style={{
+            color: 'rgba(255,255,255,0.5)', fontFamily: 'Imprima, sans-serif',
+            fontSize: '0.66rem', letterSpacing: '0.09em',
+          }}>web view</span>
+        </div>
       )}
 
       {/* -- Bottom-left identity -- visible only when sidebar is hidden -- */}
@@ -804,7 +1052,7 @@ export default function App() {
         ))}
       </div>
 
-      {splashDone && !isMobile && (
+      {(phase === 'intro' || phase === 'ready') && !isMobile && (
         <SidePanel
           section={section}
           onSection={s => { setSection(s); manualCloseRef.current = false }}
@@ -843,6 +1091,16 @@ export default function App() {
         @keyframes pulse {
           0%, 100% { opacity: 0.65; transform: translateX(-50%) translateY(0); }
           50%       { opacity: 1;    transform: translateX(-50%) translateY(5px); }
+        }
+        @keyframes pulseWebView {
+          0%, 100% { opacity: 0.45; transform: translateX(-50%) translateY(0); }
+          50%       { opacity: 0.85; transform: translateX(-50%) translateY(-5px); }
+        }
+        @keyframes controlsCenterFlash {
+          0%   { opacity: 0; }
+          10%  { opacity: 1; }
+          78%  { opacity: 1; }
+          100% { opacity: 0; }
         }
       `}</style>
     </div>
