@@ -124,7 +124,8 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
     >
       {/* Left-edge toggle tab */}
       <button
-        onClick={onCycleMode}
+        onClick={e => { e.currentTarget.blur(); onCycleMode?.() }}
+        tabIndex={-1}
         title={panelMode === 'normal' ? 'Expand panel' : panelMode === 'expanded' ? 'Close panel' : 'Open details panel'}
         style={{
           position: 'absolute', left: open ? -36 : -42, top: '50%',
@@ -227,8 +228,9 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
                 return (
                   <button
                     key={id}
+                    tabIndex={-1}
                     onMouseDown={e => e.stopPropagation()}
-                    onClick={() => onSection?.(id)}
+                    onClick={e => { e.currentTarget.blur(); onSection?.(id) }}
                     style={{
                       background: active ? 'rgba(255,255,255,0.1)' : 'none',
                       border: `1px solid ${active ? 'rgba(255,255,255,0.22)' : 'transparent'}`,

@@ -256,21 +256,26 @@ function ControlsAnimation({ visible }) {
       display: 'flex',
       flexDirection:  isCol ? 'column' : 'row',
       alignItems:     isCol ? 'flex-start' : 'center',
-      gap:            isCol ? 12 : 20,
+      gap:            isCol ? 12 : 16,
       opacity,
       color: '#fff', fontFamily: 'Imprima, sans-serif',
       pointerEvents: 'none', userSelect: 'none', letterSpacing: '0.03em',
+      background: 'rgba(0,0,0,0.45)',
+      backdropFilter: 'blur(6px)',
+      borderRadius: 10,
+      padding: isCol ? '16px 20px' : '8px 16px',
+      border: '1px solid rgba(255,255,255,0.08)',
       transition: isCol
-        ? 'opacity 0.35s ease'
-        : 'top 0.75s cubic-bezier(0.4,0,0.2,1), left 0.75s cubic-bezier(0.4,0,0.2,1), transform 0.75s ease, opacity 0.4s ease',
+        ? 'opacity 0.5s ease, padding 0.5s ease'
+        : 'top 0.9s cubic-bezier(0.4,0,0.2,1), left 0.9s cubic-bezier(0.4,0,0.2,1), transform 0.9s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease, padding 0.5s ease, border-radius 0.5s ease',
     }}>
       {!isCol && !isCorner && (
-        <div style={{ opacity: 0.3, fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: 4 }}>
+        <div style={{ opacity: 0.5, fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: 4 }}>
           controls
         </div>
       )}
       {isCol && (
-        <div style={{ opacity: 0.3, fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ opacity: 0.5, fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 4 }}>
           controls
         </div>
       )}
@@ -279,10 +284,18 @@ function ControlsAnimation({ visible }) {
           display: 'flex', alignItems: 'center',
           gap:      isCol ? 12 : 6,
           fontSize: isCol ? '0.95rem' : '0.75rem',
-          transition: 'font-size 0.35s ease, gap 0.35s ease',
+          transition: 'font-size 0.5s ease, gap 0.5s ease',
         }}>
-          <span style={{ opacity: 0.5, fontFamily: '"Courier New", monospace', fontSize: isCol ? '0.85rem' : '0.7rem' }}>{key}</span>
-          <span style={{ opacity: 0.85 }}>{label}</span>
+          <span style={{
+            opacity: 0.7,
+            fontFamily: '"Courier New", monospace',
+            fontSize: isCol ? '0.85rem' : '0.7rem',
+            background: 'rgba(255,255,255,0.12)',
+            borderRadius: 4,
+            padding: isCol ? '2px 6px' : '1px 4px',
+            transition: 'font-size 0.5s ease, padding 0.5s ease',
+          }}>{key}</span>
+          <span style={{ opacity: 0.9 }}>{label}</span>
         </span>
       ))}
     </div>
@@ -290,25 +303,44 @@ function ControlsAnimation({ visible }) {
 }
 
 function ControlsHint({ visible }) {
-  if (!visible) return null
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    if (visible) { const t = setTimeout(() => setMounted(true), 20); return () => clearTimeout(t) }
+    setMounted(false)
+  }, [visible])
+
   return (
     <div
       style={{
         position: 'fixed', top: 20, left: 24, zIndex: 30,
-        display: 'flex', alignItems: 'center', gap: 20,
+        display: 'flex', alignItems: 'center', gap: 16,
         color: '#fff', fontFamily: 'Imprima, sans-serif',
         fontSize: '0.75rem',
-        opacity: 0.50, transition: 'opacity 0.25s ease',
-        pointerEvents: 'auto', userSelect: 'none',
+        background: 'rgba(0,0,0,0.5)',
+        backdropFilter: 'blur(8px)',
+        borderRadius: 10,
+        padding: '8px 16px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        opacity: mounted && visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
+        userSelect: 'none',
         letterSpacing: '0.03em',
+        transition: 'opacity 0.4s ease',
       }}
       onMouseEnter={e => { e.currentTarget.style.opacity = '1' }}
-      onMouseLeave={e => { e.currentTarget.style.opacity = '0.18' }}
+      onMouseLeave={e => { e.currentTarget.style.opacity = mounted && visible ? '1' : '0'; }}
     >
       {HINTS.map(({ key, label }) => (
         <span key={key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ opacity: 0.5, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{key}</span>
-          <span style={{ opacity: 0.85 }}>{label}</span>
+          <span style={{
+            opacity: 0.7,
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.7rem',
+            background: 'rgba(255,255,255,0.12)',
+            borderRadius: 4,
+            padding: '1px 5px',
+          }}>{key}</span>
+          <span style={{ opacity: 0.95 }}>{label}</span>
         </span>
       ))}
     </div>
