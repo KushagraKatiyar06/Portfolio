@@ -477,7 +477,7 @@ export default function App() {
   const [debugMode,     setDebugMode]     = useState(false)
   const [dragIndex,     setDragIndex]     = useState(null)
   const [carPositions,  setCarPositions]  = useState(CAR_CONFIGS.map(c => [...c.pos]))
-  const [showControls,    setShowControls]    = useState(true)
+  const [showUI,          setShowUI]          = useState(true)
   const [portfolioFlashing, setPortfolioFlashing] = useState(false)
   const portfolioFlashKey   = useRef(0)
   const portfolioFlashTimer = useRef(null)
@@ -658,12 +658,12 @@ export default function App() {
   useEffect(() => {
     const fn = e => {
       if (e.key !== 'u' && e.key !== 'U') return
-      if (phase !== 'ready') return
-      setShowControls(v => !v)
+      if (phaseRef.current !== 'ready') return
+      setShowUI(v => !v)
     }
     window.addEventListener('keydown', fn)
     return () => window.removeEventListener('keydown', fn)
-  }, [phase])
+  }, [])
 
   useEffect(() => {
     if (portfolioOpen && canLoadCanvas) {
@@ -766,7 +766,7 @@ export default function App() {
   }, [phase, exitSplash])
 
   const splashDone = phase !== 'splash'
-  const bioVisible = phase === 'ready' && panelMode === 'hidden'
+  const bioVisible = phase === 'ready' && panelMode === 'hidden' && showUI
   
   return (
     <div style={{ width: '100vw', height: '100vh', fontFamily: 'Imprima, sans-serif' }}>
@@ -1000,17 +1000,17 @@ export default function App() {
       {!splashDone && <SplashKeyListener onEnter={exitSplash} />}
 
       {/* -- Controls hint: column → row → slides to corner -- */}
-      {controlsAnimating && showControls && !portfolioOpen && !isMobile && (
+      {controlsAnimating && showUI && !portfolioOpen && !isMobile && (
         <ControlsAnimation visible={controlsAnimating} />
       )}
 
       {/* -- Controls hint (top-left, corner) -- */}
       {phase === 'ready' && !portfolioOpen && !isMobile && (
-        <ControlsHint visible={showControls} />
+        <ControlsHint visible={showUI} />
       )}
 
       {/* -- Pulsing web-view arrow (bottom center, 3D mode) -- */}
-      {phase === 'ready' && !portfolioOpen && !isMobile && (
+      {phase === 'ready' && showUI && !portfolioOpen && !isMobile && (
         <div
           onClick={openPortfolio}
           style={{
@@ -1130,7 +1130,7 @@ export default function App() {
           onCycleMode={cycleMode}
           onManualClose={closeSidebarManually}
           onLogoClick={goToSplash}
-          showControls={showControls}
+          showUI={showUI}
         />
       )}
 
@@ -1142,7 +1142,7 @@ export default function App() {
         onLogoClick={goToSplash}
       />
 
-      {showWebViewHint && !portfolioOpen && !isMobile && (
+      {showWebViewHint && showUI && !portfolioOpen && !isMobile && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 50,
           pointerEvents: 'none',

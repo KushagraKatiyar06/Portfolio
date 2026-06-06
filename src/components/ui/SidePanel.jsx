@@ -49,7 +49,7 @@ const NAV_ITEMS = [
   { id: 'projects',   label: 'Projects'   },
 ]
 
-export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose, onLogoClick, showControls }) {
+export default function SidePanel({ section, onSection, showAbout, panelMode, onCycleMode, onManualClose, onLogoClick, showUI }) {
   const [rendered,      setRendered]  = useState(section)
   const [transitionKey, setTransKey]  = useState(0)
   const [flashing,      setFlashing]  = useState(false)
@@ -117,9 +117,10 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
         width,
         zIndex: 26,
         transform: open ? 'translateX(0)' : 'translateX(100%)',
-        transition: 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), width 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+        transition: 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), width 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease',
         overflow: 'visible',
-        pointerEvents: open ? 'auto' : 'none',
+        opacity: showUI ? 1 : 0,
+        pointerEvents: open && showUI ? 'auto' : 'none',
       }}
     >
       {/* Left-edge toggle tab */}
@@ -139,10 +140,10 @@ export default function SidePanel({ section, onSection, showAbout, panelMode, on
           borderRadius: '8px 0 0 8px',
           cursor: 'pointer',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
-          pointerEvents: open || showControls ? 'auto' : 'none',
-          opacity: open || showControls ? 1 : 0,
+          pointerEvents: open || showUI ? 'auto' : 'none',
+          opacity: open || showUI ? 1 : 0,
           transition: 'background 0.2s, border-color 0.2s, opacity 0.25s ease, width 0.3s ease, height 0.3s ease, left 0.3s ease',
-          animation: !open && showControls ? 'sidebarTabPulse 2.5s ease-in-out infinite' : 'none',
+          animation: !open && showUI ? 'sidebarTabPulse 2.5s ease-in-out infinite' : 'none',
         }}
         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)' }}
         onMouseLeave={e => { e.currentTarget.style.background = open ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.78)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)' }}
