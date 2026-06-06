@@ -469,10 +469,10 @@ export default function App() {
   const portfolioOpenRef  = useRef(false)
 
   const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768
-  const [phase,         setPhase]         = useState('splash')
+  const [phase,         _setPhase]        = useState('splash')
   const [section,       setSection]       = useState('about')
   const [introComplete, setIntroComplete] = useState(false)
-  const [portfolioOpen, setPortfolioOpen] = useState(false)
+  const [portfolioOpen, _setPortfolioOpen] = useState(false)
   const [panelMode,     setPanelMode]     = useState('hidden')
   const [debugMode,     setDebugMode]     = useState(false)
   const [dragIndex,     setDragIndex]     = useState(null)
@@ -501,9 +501,18 @@ export default function App() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Keep refs in sync so keydown listener never has stale phase/portfolioOpen
-  useEffect(() => { phaseRef.current = phase }, [phase])
-  useEffect(() => { portfolioOpenRef.current = portfolioOpen }, [portfolioOpen])
+  // Synchronous wrappers — ref is updated BEFORE React re-renders, so the
+  // keydown listener (registered once, reads refs) never sees a stale value.
+  function setPhase(v) {
+    const next = typeof v === 'function' ? v(phaseRef.current) : v
+    phaseRef.current = next
+    _setPhase(next)
+  }
+  function setPortfolioOpen(v) {
+    const next = typeof v === 'function' ? v(portfolioOpenRef.current) : v
+    portfolioOpenRef.current = next
+    _setPortfolioOpen(next)
+  }
 
   const onIntroComplete = useCallback(() => {
     setIntroComplete(true)
@@ -559,6 +568,7 @@ export default function App() {
   }, [phase, isMobile])
 
   const choose3D = useCallback(() => {
+    if (phaseRef.current === 'ready') return   // already in 3D — don't restart intro
     setTopFlashing(false)
     clearTimeout(topFlashTimer.current)
     requestAnimationFrame(() => requestAnimationFrame(() => setTopFlashing(true)))
