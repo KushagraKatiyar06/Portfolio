@@ -232,6 +232,7 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
       overflow: 'hidden', fontFamily: 'Imprima, sans-serif',
       transform: show ? 'translateY(0)' : 'translateY(100%)',
       transition: 'transform 1.4s cubic-bezier(0.16, 1, 0.3, 1)',
+      pointerEvents: show ? 'auto' : 'none',
     }}>
       <div style={{
         position: 'absolute', inset: 0,

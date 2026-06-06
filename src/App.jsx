@@ -462,9 +462,11 @@ function SceneControls({ section, startIntro, introComplete, onIntroComplete, de
 }
 
 export default function App() {
-  const tooltipRef     = useRef()
-  const manualCloseRef = useRef(false)
-  const debugInfoRef   = useRef({ pos: [0, 0, 0], target: [0, 0, 0] })
+  const tooltipRef        = useRef()
+  const manualCloseRef    = useRef(false)
+  const debugInfoRef      = useRef({ pos: [0, 0, 0], target: [0, 0, 0] })
+  const phaseRef          = useRef('splash')
+  const portfolioOpenRef  = useRef(false)
 
   const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768
   const [phase,         setPhase]         = useState('splash')
@@ -481,6 +483,8 @@ export default function App() {
   const portfolioFlashTimer = useRef(null)
   const [controlsAnimating, setControlsAnimating] = useState(false)
   const controlsAnimTimer = useRef(null)
+  const [showWebViewHint, setShowWebViewHint] = useState(false)
+  const webViewHintTimers = useRef([])
   const [topFlashing, setTopFlashing] = useState(false)
   const topFlashTimer = useRef(null)
 
@@ -496,6 +500,10 @@ export default function App() {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Keep refs in sync so keydown listener never has stale phase/portfolioOpen
+  useEffect(() => { phaseRef.current = phase }, [phase])
+  useEffect(() => { portfolioOpenRef.current = portfolioOpen }, [portfolioOpen])
 
   const onIntroComplete = useCallback(() => {
     setIntroComplete(true)
@@ -588,17 +596,27 @@ export default function App() {
 
   const handleSceneClick = useCallback(() => {
     if (debugMode || phase !== 'ready' || portfolioOpen) return
-    if (panelMode === 'hidden') {
-      manualCloseRef.current = false
-      setPanelMode('normal')
-    } else {
+    setPanelMode(m => {
+      if (m === 'hidden') {
+        manualCloseRef.current = false
+        return 'normal'
+      }
       manualCloseRef.current = true
-      setPanelMode('hidden')
-    }
-  }, [debugMode, phase, portfolioOpen, panelMode])
+      return 'hidden'
+    })
+  }, [debugMode, phase, portfolioOpen])
 
   useEffect(() => {
     const fn = e => {
+      if (e.repeat) return
+      const phase = phaseRef.current
+      const portfolioOpen = portfolioOpenRef.current
+      // On the chooser or intro screen, any non-modifier key → proceed to 3D
+      if (phase === 'chooser' || phase === 'intro') {
+        if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab', 'Escape'].includes(e.key)) return
+        choose3D()
+        return
+      }
       if (phase !== 'ready') return
       if (portfolioOpen) {
         if (e.key === 'Escape') closePortfolio()
@@ -613,17 +631,19 @@ export default function App() {
       } else if (e.key === 'ArrowDown') {
         closePortfolio()
       } else if (e.key === 'Enter') {
-        if (panelMode === 'expanded') {
-          manualCloseRef.current = true
-          setPanelMode('hidden')
-        } else {
-          handleSceneClick()
-        }
+        setPanelMode(m => {
+          if (m !== 'hidden') {
+            manualCloseRef.current = true
+            return 'hidden'
+          }
+          manualCloseRef.current = false
+          return 'normal'
+        })
       }
     }
     window.addEventListener('keydown', fn)
     return () => window.removeEventListener('keydown', fn)
-  }, [phase, portfolioOpen, closePortfolio, handleSceneClick])
+  }, [choose3D, closePortfolio, openPortfolio])  // stable refs — no stale closure on phase/portfolioOpen
 
   useEffect(() => {
     const fn = e => {
@@ -700,8 +720,15 @@ export default function App() {
     if (phase === 'ready') {
       setControlsAnimating(true)
       controlsAnimTimer.current = setTimeout(() => setControlsAnimating(false), 2800)
+      // Show web view hint after controls animation ends
+      const t1 = setTimeout(() => setShowWebViewHint(true), 2800)
+      const t2 = setTimeout(() => setShowWebViewHint(false), 2800 + 2000)
+      webViewHintTimers.current = [t1, t2]
     }
-    return () => clearTimeout(controlsAnimTimer.current)
+    return () => {
+      clearTimeout(controlsAnimTimer.current)
+      webViewHintTimers.current.forEach(clearTimeout)
+    }
   }, [phase])
 
   // Scroll/swipe down on splash triggers same action as the arrow
@@ -986,12 +1013,12 @@ export default function App() {
           onMouseLeave={e => { e.currentTarget.style.opacity = '' }}
         >
           <svg width="22" height="14" viewBox="0 0 28 17" fill="none">
-            <path d="M2 15l12-13 12 13" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              style={{ filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))' }}
+            <path d="M2 15l12-13 12 13" stroke="rgba(255,255,255,0.92)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.7))' }}
             />
           </svg>
           <span style={{
-            color: 'rgba(255,255,255,0.5)', fontFamily: 'Imprima, sans-serif',
+            color: 'rgba(255,255,255,0.78)', fontFamily: 'Imprima, sans-serif',
             fontSize: '0.66rem', letterSpacing: '0.09em',
           }}>web view</span>
         </div>
@@ -1105,6 +1132,34 @@ export default function App() {
         onLogoClick={goToSplash}
       />
 
+      {showWebViewHint && !portfolioOpen && !isMobile && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          pointerEvents: 'none',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.55)',
+          animation: 'webViewHintFade 2s ease forwards',
+        }}>
+          <div style={{
+            fontFamily: 'Imprima, sans-serif',
+            fontSize: '1.05rem', letterSpacing: '0.14em',
+            color: 'rgba(255,255,255,0.88)',
+            textAlign: 'center', lineHeight: 2,
+          }}>
+            3D not loading?<br />
+            press{' '}
+            <span style={{
+              fontFamily: '"Courier New", monospace',
+              background: 'rgba(255,255,255,0.13)',
+              border: '1px solid rgba(255,255,255,0.25)',
+              padding: '2px 10px', borderRadius: 4,
+              fontSize: '1.1rem',
+            }}>↑</span>
+            {' '}for web view
+          </div>
+        </div>
+      )}
+
       <div
         ref={tooltipRef}
         style={{
@@ -1125,13 +1180,19 @@ export default function App() {
           50%       { opacity: 1;    transform: translateX(-50%) translateY(5px); }
         }
         @keyframes pulseWebView {
-          0%, 100% { opacity: 0.45; transform: translateX(-50%) translateY(0); }
-          50%       { opacity: 0.85; transform: translateX(-50%) translateY(-5px); }
+          0%, 100% { opacity: 0.65; transform: translateX(-50%) translateY(0); }
+          50%       { opacity: 1;    transform: translateX(-50%) translateY(-5px); }
         }
         @keyframes controlsCenterFlash {
           0%   { opacity: 0; }
           10%  { opacity: 1; }
           78%  { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes webViewHintFade {
+          0%   { opacity: 0; }
+          15%  { opacity: 1; }
+          75%  { opacity: 1; }
           100% { opacity: 0; }
         }
       `}</style>
@@ -1142,6 +1203,7 @@ export default function App() {
 function SplashKeyListener({ onEnter }) {
   useEffect(() => {
     const fn = e => {
+      if (e.repeat) return
       if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab'].includes(e.key)) return
       onEnter()
     }
