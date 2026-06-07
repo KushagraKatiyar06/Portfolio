@@ -512,8 +512,9 @@ export const projects = {
     },
     {
       name: 'Train of Four - Computer Vision',
-      subtitle: 'Dream Team Engineering',
+      subtitle: 'Computer Vision Twitch Detection',
       image: a('/assets/projects/trainoffourcover.png'),
+      video: 'https://drive.google.com/file/d/11LKlIeQ3nOZiEjWwebAquUEZ6EtfPt_3/view?usp=sharing',
       figma: 'https://www.figma.com/design/9xN80lyUwTB49QHRoiEFOM/Train-of-Four?node-id=0-1&t=xCj48S77fSBcetZM-1',
       stack: [
         { label: 'Python',    icon: a('/assets/python.svg') },
