@@ -4,7 +4,7 @@ const a = p => `${B}${p.replace(/^\//, '')}`
 // Name, title, location, bio, avatar and resume link shown across the site
 export const profile = {
   name:     'Kushagra Katiyar',
-  title:    'CS @ University of Florida | Full-Stack Developer',
+  title:    'CS @ University of Florida | 4x Hackathon Winnerr',
   location: 'Lake Mary, Florida',
   bio:      "I am pursuing a bachelor's in Computer Science at the University of Florida. I specialize in Agentic AI Systems, Full Stack Development, and UI/UX Design. I have shipped real-world applications and hold leadership on campus, demonstrating skills in teamwork, communication, and problem-solving. Outside of tech, my interests include gaming, cars, and Taekwondo. I post flute videos on TikTok and Instagram, accumulating over 500,000 views.",
   avatar:   a('/assets/profile_picture_landing.jpg'),
@@ -365,32 +365,6 @@ export const projects = {
       ],
     },
     {
-      name: 'Alex Willow Platform',
-      subtitle: 'Swamp Records',
-      image: a('/assets/projects/alexwillowcover.png'),
-      live: 'http://alexwillowmusic.com',
-      figma: 'https://www.figma.com/design/AJj1ttznW3Z7to4AeR6cmU/Alex-Willow?node-id=0-1&t=juGwiZwyrqI5RuM9-1',
-      stack: [
-        { label: 'React',       icon: a('/assets/react.svg') },
-        { label: 'TypeScript',  icon: a('/assets/typescript.svg') },
-        { label: 'Figma',       icon: a('/assets/figma.svg') },
-      ],
-    },
-    {
-      name: 'Not My First Swamp',
-      subtitle: 'AI Powered UF Routine Builder',
-      badge: 'Designathon Winner',
-      image: a('/assets/projects/notmyfirstswampcover.png'),
-      live: 'https://notmyfirstswamp.framer.website/',
-      video: 'https://www.youtube.com/watch?v=65fP_CaYL_U',
-      stack: [
-        { label: 'Framer',     icon: a('/assets/framer.svg') },
-        { label: 'ShadCN',     icon: a('/assets/shadcn.svg') },
-        { label: 'TypeScript', icon: a('/assets/typescript.svg') },
-        { label: 'Gemini',     icon: a('/assets/gemini.svg') },
-      ],
-    },
-    {
       name: 'Steam Search',
       subtitle: 'Game Recommendation Engine',
       image: a('/assets/projects/steamsearch.png'),
@@ -405,6 +379,18 @@ export const projects = {
         { label: 'React', icon: a('/assets/react.svg') },
         { label: 'AWS',   icon: a('/assets/aws.svg') },
         { label: 'Figma', icon: a('/assets/figma.svg') },
+      ],
+    },
+    {
+      name: 'Alex Willow Platform',
+      subtitle: 'Swamp Records',
+      image: a('/assets/projects/alexwillowcover.png'),
+      live: 'http://alexwillowmusic.com',
+      figma: 'https://www.figma.com/design/AJj1ttznW3Z7to4AeR6cmU/Alex-Willow?node-id=0-1&t=juGwiZwyrqI5RuM9-1',
+      stack: [
+        { label: 'React',       icon: a('/assets/react.svg') },
+        { label: 'TypeScript',  icon: a('/assets/typescript.svg') },
+        { label: 'Figma',       icon: a('/assets/figma.svg') },
       ],
     },
     {

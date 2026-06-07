@@ -122,10 +122,21 @@ const EXP_GROUPS = [
 ]
 
 const PROJ_GROUPS = [
-  { key: 'live',      label: 'Live',      accent: '#4ddf8a' },
-  { key: 'technical', label: 'Technical', accent: '#b187ff' },
-  { key: 'design',    label: 'Design',    accent: '#ffd166' },
+  { key: 'live',         label: 'Live',          accent: '#4ddf8a' },
+  { key: 'prizewinners', label: 'Prize Winners',  accent: '#ffd166' },
+  { key: 'technical',   label: 'Technical',      accent: '#b187ff' },
+  { key: 'design',      label: 'Design',         accent: '#ff4d6d' },
 ]
+
+const seenNames = new Set()
+const prizeWinners = ['live', 'technical', 'design']
+  .flatMap(k => projects[k] ?? [])
+  .filter(p => {
+    if (!p.badge || seenNames.has(p.name)) return false
+    seenNames.add(p.name)
+    return true
+  })
+const allProjects = { ...projects, prizewinners: prizeWinners }
 
 function ResumeButton() {
   return (
@@ -609,7 +620,7 @@ function ProjectsTab({ projTab, setProjTab }) {
   }, [])
   
   const group = PROJ_GROUPS.find(g => g.key === projTab) ?? PROJ_GROUPS[0]
-  const items = projects[projTab] ?? []
+  const items = allProjects[projTab] ?? []
   return (
     <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>

@@ -2,16 +2,30 @@ import { projects } from '../../data/portfolio'
 import { a } from '../../utils/asset'
 
 const GROUPS = [
-  { key: 'live',      label: 'Live Projects',      accent: '#4ddf8a' },
-  { key: 'technical', label: 'Technical Projects',  accent: '#b187ff' },
-  { key: 'design',    label: 'Design Projects',     accent: '#ffd166' },
+  { key: 'live',         label: 'Live Projects',      accent: '#4ddf8a' },
+  { key: 'prizewinners', label: 'Prize Winners',       accent: '#ffd166' },
+  { key: 'technical',   label: 'Technical Projects',  accent: '#b187ff' },
+  { key: 'design',      label: 'Design Projects',     accent: '#ff4d6d' },
 ]
+
+// Collect all prize-winning projects (those with a badge) across all groups,
+// deduped by name so duplicates across tabs only appear once.
+const seenNames = new Set()
+const prizeWinners = ['live', 'technical', 'design']
+  .flatMap(k => projects[k] ?? [])
+  .filter(p => {
+    if (!p.badge || seenNames.has(p.name)) return false
+    seenNames.add(p.name)
+    return true
+  })
+
+const allProjects = { ...projects, prizewinners: prizeWinners }
 
 export default function ProjectsSection({ expanded = false }) {
   return (
     <div style={{ padding: '20px 18px 48px' }}>
       {GROUPS.map(({ key, label, accent }) => {
-        const items = projects[key]
+        const items = allProjects[key]
         if (!items?.length) return null
         return (
           <div key={key} style={{ marginBottom: 32 }}>
