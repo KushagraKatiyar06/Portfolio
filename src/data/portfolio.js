@@ -146,10 +146,9 @@ export const experiences = [
     location: 'Tampa, Florida',
     logo: a('/assets/orgs/primobrands.jpg'),
     bullets: [
+      'Building deployed AI software tooling and providing AI trainings at a $7B organization. Reporting to VP of IT Infrastructure.',
+      'Built a RAG chat for 10K employees. Utilized ServiceNow API, React, Azure AI Foundry; deployed on Azure backends.',
       'Building enterprise internal web tooling to automate IT workflows, serving cross-functional teams.',
-      'Designing user-facing interfaces for knowledge retrieval, collaborating with stakeholders on requirements.',
-      'Enforcing data validation using Pydantic, ensuring consistent and reliable outputs across internal tools.',
-      'Presenting tooling evaluations and feature recommendations to senior leadership.',
     ],
     stack: [
       { label: 'Python',     icon: a('/assets/python.svg') },
@@ -165,9 +164,9 @@ export const experiences = [
     location: 'University of Florida',
     logo: a('/assets/orgs/college_of_education.jpg'),
     bullets: [
-      'Implementing LLM-as-a-judge to grade decodable texts used across 5+ elementary schools, improving child engagement.',
-      'Developed RAG system to vectorize and store 200+ stories, resulting in prompt sizes reduced from 25,000 to 1000 tokens.',
-      'Enforced data integrity across Llama, GPT and Gemini model outputs using Pydantic validation further cutting prompt costs.',
+      'Designed a multi-AI-agent processing pipeline parsing 200+ children\'s stories, generating evaluations for 5+ elementary schools.',
+      'Devised hard/soft rule grading structures with Pydantic schemas, raising Cohen\'s Kappa metric from 0.40 to 0.72.',
+      'Implemented RAG layer for dynamic rubric and context selection. Results in LLM calls cut from 25,000 to 1,000 tokens.',
     ],
     stack: [
       { label: 'Python',  icon: a('/assets/python.svg') },
@@ -202,9 +201,9 @@ export const experiences = [
     location: 'Gainesville, Florida',
     logo: a('/assets/orgs/dreamteam.png'),
     bullets: [
-      'Building a Kotlin Android app for Train-of-Four anesthesia testing, providing an alternative to $2000 of medical equipment.',
-      'Engineered motion pipeline with MediaPipe ROI, optical flow stabilization, Savitzky-Golay filtering, and T4/T1 area ratio.',
-      'Achieved 90% accuracy across 400+ Unity simulations and preparing for IRB-approved field trials at UF Shands Hospital.',
+      'Architected a medical Android app replacing $10k+ of clinical hardware for post-anaesthesia twitch detection (Train-of-Four).',
+      'Built a mobile-native OpenCV optical-flow filter with live Mediapipe hand tracking. Detects muscle twitches with 90% accuracy.',
+      'Built a dual-path pipeline supporting 60 FPS live CameraX capture alongside asynchronous H.264 decoding with Kotlin.',
     ],
     stack: [
       { label: 'Java',      icon: a('/assets/java.svg') },
