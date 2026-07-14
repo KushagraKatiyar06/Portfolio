@@ -532,6 +532,14 @@ export default function App() {
     canvasLoadTimer.current = setTimeout(() => setCanLoadCanvas(true), 1500)
   }, [])
 
+  const switchTo3D = useCallback(() => {
+    setPortfolioOpen(false)
+    setIntroComplete(false)
+    setPhase('intro')
+    setCanLoadCanvas(true)
+    manualCloseRef.current = false
+  }, [])
+
   const goToSplash = useCallback(() => {
     if (isMobile) {
       setPortfolioOpen(false)
@@ -563,7 +571,8 @@ export default function App() {
     clearTimeout(splashExitTimer.current)
     splashExitTimer.current = setTimeout(() => {
       setSplashFlashing(false)
-      setPhase('chooser')
+      setPhase('ready')
+      setPortfolioOpen(true)
     }, 400)
   }, [phase, isMobile])
 
@@ -976,6 +985,39 @@ export default function App() {
                 }} />
                 {profile.location}
               </div>
+
+              {/* 3D Portfolio button — desktop only */}
+              {!isMobile && (
+                <button
+                  onClick={e => { e.stopPropagation(); choose3D() }}
+                  style={{
+                    marginTop: 22,
+                    display: 'inline-flex', alignItems: 'center', gap: 9,
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.55)',
+                    borderRadius: 6, padding: '8px 18px',
+                    fontFamily: 'Imprima, sans-serif',
+                    fontSize: '0.74rem', letterSpacing: '0.14em',
+                    textTransform: 'uppercase', color: 'rgba(255,255,255,0.78)',
+                    cursor: 'pointer', transition: 'all 0.22s ease',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+                    e.currentTarget.style.borderColor = '#fff'
+                    e.currentTarget.style.color = '#fff'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.55)'
+                    e.currentTarget.style.color = 'rgba(255,255,255,0.78)'
+                  }}
+                >
+                  View 3D Portfolio
+                  <svg width="13" height="10" viewBox="0 0 14 10" fill="none">
+                    <path d="M9 1l4 4-4 4M1 5h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1140,6 +1182,7 @@ export default function App() {
         section={section}
         onSection={s => { setSection(s); manualCloseRef.current = false }}
         onLogoClick={goToSplash}
+        onSwitch3D={!isMobile ? switchTo3D : undefined}
       />
 
       {showWebViewHint && showUI && !portfolioOpen && !isMobile && (

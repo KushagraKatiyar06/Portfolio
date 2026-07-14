@@ -82,43 +82,10 @@ const NAV_TABS = [
 ]
 
 // Sorting function: PRESENT at top, then by start date (most recent first), then prefer technical
-function sortExperiences(items) {
-  return items.sort((a, b) => {
-    const aIsPresent = a.duration.includes('Present')
-    const bIsPresent = b.duration.includes('Present')
-    
-    // Both present or both not present
-    if (aIsPresent === bIsPresent) {
-      // Extract start month/year from duration
-      const getStartDate = (duration) => {
-        const [start] = duration.split(' – ')
-        const months = { January: 1, February: 2, March: 3, April: 4, May: 5, June: 6, July: 7, August: 8, September: 9, October: 10, November: 11, December: 12 }
-        const [month, year] = start.split(' ')
-        return new Date(parseInt(year), months[month] - 1)
-      }
-      
-      const dateA = getStartDate(a.duration)
-      const dateB = getStartDate(b.duration)
-      
-      // More recent start date first
-      if (dateA.getTime() !== dateB.getTime()) {
-        return dateB.getTime() - dateA.getTime()
-      }
-      
-      // If same date, prefer technical roles (experience) over others
-      const typeOrder = { experience: 0, leadership: 1, extracurricular: 2 }
-      return (typeOrder[a.type] ?? 3) - (typeOrder[b.type] ?? 3)
-    }
-    
-    // Present comes before non-present
-    return aIsPresent ? -1 : 1
-  })
-}
 
 const EXP_GROUPS = [
-  { key: 'experience',      label: 'Professional Experience', accent: '#48bcff' },
-  { key: 'extracurricular', label: 'Extracurriculars',       accent: '#ffd166' },
-  { key: 'leadership',      label: 'Leadership',              accent: '#b187ff' },
+  { key: 'experience',  label: 'Professional Experience', accent: '#48bcff' },
+  { key: 'involvement', label: 'Involvement',             accent: '#ffd166' },
 ]
 
 const PROJ_GROUPS = [
@@ -138,15 +105,26 @@ const prizeWinners = ['live', 'technical', 'design']
   })
 const allProjects = { ...projects, prizewinners: prizeWinners }
 
+// Flat ordered sequence for scroll-cycling: forward = down, backward = up
+const CYCLE_SEQ = [
+  { tab: 'about',      expTab: 'experience',  projTab: 'live' },
+  { tab: 'experience', expTab: 'experience',  projTab: 'live' },
+  { tab: 'experience', expTab: 'involvement', projTab: 'live' },
+  { tab: 'projects',   expTab: 'involvement', projTab: 'live' },
+  { tab: 'projects',   expTab: 'involvement', projTab: 'prizewinners' },
+  { tab: 'projects',   expTab: 'involvement', projTab: 'technical' },
+  { tab: 'projects',   expTab: 'involvement', projTab: 'design' },
+]
+
 function ResumeButton() {
   return (
     <a href={profile.resume} target="_blank" rel="noreferrer" style={{
-      display: 'inline-flex', alignItems: 'center', gap: 7,
-      padding: '6px 14px',
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      padding: '5px 11px',
       border: '1px solid rgba(255,255,255,0.2)',
-      borderRadius: 6, textDecoration: 'none',
+      borderRadius: 5, textDecoration: 'none',
       fontFamily: 'Imprima, sans-serif',
-      fontSize: '0.72rem', letterSpacing: '0.12em',
+      fontSize: '0.65rem', letterSpacing: '0.12em',
       textTransform: 'uppercase', color: 'rgba(255,255,255,0.72)',
       transition: 'background 0.2s, border-color 0.2s, color 0.2s',
       background: 'transparent', flexShrink: 0, whiteSpace: 'nowrap',
@@ -160,18 +138,24 @@ function ResumeButton() {
   )
 }
 
-export default function FullPortfolio({ visible, onClose, section, onSection, onLogoClick }) {
+export default function FullPortfolio({ visible, onClose, section, onSection, onLogoClick, onSwitch3D }) {
   const [inDom,        setInDom]        = useState(false)
   const [show,         setShow]         = useState(false)
   const [tab,          setTab]          = useState('about')
   const [expTab,       setExpTab]       = useState('experience')
   const [projTab,      setProjTab]      = useState('live')
-  const [flashing,     setFlashing]     = useState(false)
-  const [transitionKey, setTransKey]   = useState(0)
-  const [isMobile,     setIsMobile]    = useState(false)
-  const [rx7ZIndex,    setRx7ZIndex]   = useState(1)
-  const flashTimer = useRef(null)
-  const flashKey = useRef(0)
+  const [flashing,      setFlashing]     = useState(false)
+  const [contentVisible, setContentVisible] = useState(true)
+  const [isMobile,      setIsMobile]    = useState(false)
+  const [rx7ZIndex,     setRx7ZIndex]   = useState(1)
+  const flashTimer    = useRef(null)
+  const flashKey      = useRef(0)
+  const scrollRef     = useRef()
+  const lastCycleRef  = useRef(0)
+  const dwellTimer    = useRef(null)
+  const fadeTimer     = useRef(null)
+  const onSectionRef  = useRef(onSection)
+  useEffect(() => { onSectionRef.current = onSection }, [onSection])
 
   // Detect mobile
   useEffect(() => {
@@ -194,7 +178,7 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible])
 
-  function triggerFlash() {
+  function doFlash() {
     flashKey.current++
     clearTimeout(flashTimer.current)
     setFlashing(false)
@@ -202,14 +186,25 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
     flashTimer.current = setTimeout(() => setFlashing(false), 900)
   }
 
+  // Fade out content, apply fn() after 240ms, fade back in
+  const fadeApply = useCallback((fn, withFlash = false) => {
+    clearTimeout(fadeTimer.current)
+    setContentVisible(false)
+    if (withFlash) doFlash()
+    fadeTimer.current = setTimeout(() => {
+      fn()
+      requestAnimationFrame(() => requestAnimationFrame(() => setContentVisible(true)))
+    }, 240)
+  }, [])
+
   const switchTab = useCallback(id => {
     if (id === tab) return
-    triggerFlash()
-    setTab(id)
-    setTransKey(k => k + 1)
-    setRx7ZIndex(1)
-    onSection?.(id)
-  }, [tab, onSection])
+    fadeApply(() => {
+      setTab(id)
+      setRx7ZIndex(1)
+      onSectionRef.current?.(id)
+    }, true)
+  }, [tab, fadeApply])
 
   useEffect(() => {
     if (!visible) return
@@ -235,6 +230,86 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
     return () => window.removeEventListener('keydown', fn)
   }, [visible, onClose, tab, switchTab])
 
+  // Scroll-to-cycle-tabs: scroll down at bottom → forward, scroll up at top → backward
+  useEffect(() => {
+    const container = scrollRef.current
+    if (!container || !show) return
+
+    const getCycleIdx = () => {
+      for (let i = CYCLE_SEQ.length - 1; i >= 0; i--) {
+        const s = CYCLE_SEQ[i]
+        if (s.tab !== tab) continue
+        if (s.tab === 'experience' && s.expTab !== expTab) continue
+        if (s.tab === 'projects' && s.projTab !== projTab) continue
+        return i
+      }
+      return 0
+    }
+
+    const applyStep = (idx) => {
+      const s = CYCLE_SEQ[idx]
+      const tabChanging = s.tab !== tab
+      clearTimeout(fadeTimer.current)
+      setContentVisible(false)
+      if (tabChanging) {
+        // flash only on main-tab change
+        flashKey.current++
+        clearTimeout(flashTimer.current)
+        setFlashing(false)
+        requestAnimationFrame(() => requestAnimationFrame(() => setFlashing(true)))
+        flashTimer.current = setTimeout(() => setFlashing(false), 900)
+      }
+      fadeTimer.current = setTimeout(() => {
+        if (tabChanging) {
+          setTab(s.tab)
+          setRx7ZIndex(1)
+          onSectionRef.current?.(s.tab)
+        }
+        setExpTab(s.expTab)
+        setProjTab(s.projTab)
+        if (scrollRef.current) scrollRef.current.scrollTop = 0
+        requestAnimationFrame(() => requestAnimationFrame(() => setContentVisible(true)))
+      }, 240)
+    }
+
+    // Scroll event: detect bottom boundary for forward cycling
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container
+      const atBottom = scrollHeight - clientHeight - scrollTop < 120
+      if (!atBottom) { clearTimeout(dwellTimer.current); return }
+      const now = Date.now()
+      if (now - lastCycleRef.current < 1200) return
+      clearTimeout(dwellTimer.current)
+      dwellTimer.current = setTimeout(() => {
+        lastCycleRef.current = Date.now()
+        applyStep((getCycleIdx() + 1) % CYCLE_SEQ.length)
+      }, 400)
+    }
+
+    // Wheel event: detect upward scroll at top for backward cycling
+    const handleWheel = (e) => {
+      if (container.scrollTop > 15) return
+      if (e.deltaY >= 0) return
+      const now = Date.now()
+      if (now - lastCycleRef.current < 1200) return
+      clearTimeout(dwellTimer.current)
+      dwellTimer.current = setTimeout(() => {
+        lastCycleRef.current = Date.now()
+        applyStep((getCycleIdx() - 1 + CYCLE_SEQ.length) % CYCLE_SEQ.length)
+      }, 200)
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    container.addEventListener('wheel',  handleWheel,  { passive: true })
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+      container.removeEventListener('wheel',  handleWheel)
+      clearTimeout(dwellTimer.current)
+    }
+  // fadeTimer/flashTimer/flashKey/scrollRef are all stable refs — not needed in deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show, tab, expTab, projTab])
+
   if (!inDom) return null
 
   return (
@@ -250,9 +325,9 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
         backgroundImage: isMobile ? 'none' : `url(${a('/assets/rx7_background.jpg')})`,
         backgroundColor: '#0a0a0a',
         backgroundSize: 'cover', backgroundPosition: 'center',
-        filter: 'brightness(0.3) saturate(0.8)',
+        filter: 'brightness(0.5) saturate(0.9)',
       }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.52)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.32)' }} />
 
       {flashing && (
         <>
@@ -325,38 +400,65 @@ export default function FullPortfolio({ visible, onClose, section, onSection, on
           isMobile={isMobile}
         />
 
-        <div className="v1-scroll" style={{
+        <div ref={scrollRef} className="v1-scroll" style={{
           flex: 1, overflowY: 'auto', overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
           paddingTop: isMobile ? 56 : 80,
           paddingRight: isMobile ? 16 : 352,
           paddingLeft: isMobile ? 16 : 0,
-          paddingBottom: isMobile ? 32 : 0,
+          paddingBottom: isMobile ? 60 : 160,
         }}>
-          <div key={transitionKey} style={{ animation: 'tabFadeIn 0.35s ease-out forwards' }}>
+          <div style={{
+            opacity: contentVisible ? 1 : 0,
+            transform: contentVisible ? 'translateY(0)' : 'translateY(8px)',
+            transition: contentVisible
+              ? 'opacity 0.38s ease, transform 0.38s ease'
+              : 'opacity 0.22s ease, transform 0.22s ease',
+          }}>
             {tab === 'about'      && <AboutTab />}
             {tab === 'experience' && <ExperienceTab expTab={expTab} setExpTab={setExpTab} />}
             {tab === 'projects'   && <ProjectsTab projTab={projTab} setProjTab={setProjTab} />}
           </div>
         </div>
 
-        {!isMobile && (
-          <div onClick={onClose} style={{
-            position: 'absolute', bottom: 44, left: '50%', transform: 'translateX(-50%)',
-            zIndex: 10, cursor: 'pointer',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-            animation: 'pulse 2s ease-in-out infinite',
-          }}>
-            <span style={{
-              color: 'rgba(255,255,255,0.5)', fontFamily: 'Imprima, sans-serif',
-              fontSize: '0.66rem', letterSpacing: '0.09em',
-            }}>3D view</span>
-            <svg width="28" height="17" viewBox="0 0 28 17" fill="none">
-              <path d="M2 2l12 13 12-13" stroke="rgba(255,255,255,0.95)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.9))' }}
-              />
+        {!isMobile && onSwitch3D && (
+          <button
+            onClick={onSwitch3D}
+            style={{
+              position: 'absolute', bottom: 28, right: 40,
+              zIndex: 10, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 10,
+              background: 'rgba(0,0,0,0.55)',
+              border: '1px solid rgba(255,255,255,0.38)',
+              borderRadius: 8, padding: '11px 22px',
+              fontFamily: 'Imprima, sans-serif',
+              fontSize: '0.82rem', letterSpacing: '0.12em',
+              color: 'rgba(255,255,255,0.78)',
+              backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+              textTransform: 'uppercase',
+              transition: 'all 0.22s ease',
+              animation: 'pulse 2.4s ease-in-out infinite',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.75)'
+              e.currentTarget.style.color = '#fff'
+              e.currentTarget.style.boxShadow = '0 0 18px rgba(255,255,255,0.1)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(0,0,0,0.55)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.38)'
+              e.currentTarget.style.color = 'rgba(255,255,255,0.78)'
+              e.currentTarget.style.boxShadow = 'none'
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
+              <line x1="12" y1="2" x2="12" y2="22"/>
+              <polyline points="22 8.5 12 15 2 8.5"/>
             </svg>
-          </div>
+            Switch to 3D
+          </button>
         )}
       </div>
     </div>
@@ -468,58 +570,56 @@ function AboutTab() {
   }, [])
   
   return (
-    <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
+    <div style={{ maxWidth: isMobile ? '100%' : 820, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '24px 40px 56px' }}>
 
-      {/* Badges row + Resume on the right — desktop only */}
+      {/* Badges row — desktop only */}
       {!isMobile && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'nowrap' }}>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {[
-              { label: 'Agentic AI Systems',     color: '#b187ff' },
-              { label: 'Full Stack Development', color: '#48bcff' },
-              { label: 'UI/UX Design',           color: '#ffd166' },
-            ].map(({ label, color }) => (
-              <span key={label} style={{
-                fontSize: '0.75rem', letterSpacing: '0.08em', whiteSpace: 'nowrap',
-                color, border: `1px solid ${color}44`, padding: '5px 13px', borderRadius: 4,
-                fontFamily: 'Imprima, sans-serif', textShadow: `0 0 8px ${color}55`,
-                background: `${color}0a`,
-              }}>
-                {label}
-              </span>
-            ))}
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Agentic AI Systems',     color: '#b187ff' },
+            { label: 'Full Stack Development', color: '#48bcff' },
+            { label: 'UI/UX Design',           color: '#ffd166' },
+          ].map(({ label, color }) => (
+            <span key={label} style={{
+              fontSize: '0.66rem', letterSpacing: '0.08em', whiteSpace: 'nowrap',
+              color, border: `1px solid ${color}44`, padding: '4px 10px', borderRadius: 4,
+              fontFamily: 'Imprima, sans-serif', textShadow: `0 0 8px ${color}55`,
+              background: `${color}0a`,
+            }}>
+              {label}
+            </span>
+          ))}
         </div>
       )}
 
       <SectionHeading>About Me</SectionHeading>
       <p
         style={{
-          fontSize: 'clamp(0.92rem, 1.3vw, 1.05rem)',
-          color: 'rgba(255,255,255,0.75)', lineHeight: 1.9,
-          marginBottom: 16,
+          fontSize: 'clamp(0.82rem, 1.1vw, 0.93rem)',
+          color: 'rgba(255,255,255,0.75)', lineHeight: 1.85,
+          marginBottom: 14,
           borderLeft: '2px solid rgba(255,255,255,0.12)',
-          paddingLeft: 18,
-          maxWidth: 'min(520px, 100%)',
+          paddingLeft: 14,
+          maxWidth: 'min(500px, 100%)',
         }}
         dangerouslySetInnerHTML={{ __html: hlBio(profile.bio) }}
       />
-      <div style={{ marginBottom: 48 }}><ResumeButton /></div>
+      <div style={{ marginBottom: 36 }}><ResumeButton /></div>
 
       <SectionHeading>Tech Stack</SectionHeading>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
         {Object.entries(skills).map(([cat, items]) => (
           <div key={cat}>
             <div style={{
-              fontSize: '0.72rem', letterSpacing: '0.24em',
-              color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', marginBottom: 14,
+              fontSize: '0.66rem', letterSpacing: '0.24em',
+              color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', marginBottom: 11,
             }}>
               {cat}
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
               {items.map(({ label, icon }) => (
                 <div key={label} className="v1-icon" data-tip={label}>
-                  <img src={icon} alt={label} style={{ width: 32, height: 32, objectFit: 'contain' }} />
+                  <img src={icon} alt={label} style={{ width: 26, height: 26, objectFit: 'contain' }} />
                 </div>
               ))}
             </div>
@@ -541,7 +641,7 @@ function ExperienceTab({ expTab, setExpTab }) {
   }, [])
   
   const group  = EXP_GROUPS.find(g => g.key === expTab) ?? EXP_GROUPS[0]
-  const items  = sortExperiences(experiences.filter(e => e.type === expTab))
+  const items  = experiences.filter(e => e.type === expTab)
   return (
     <div style={{ maxWidth: isMobile ? '100%' : 920, margin: '0 auto', padding: isMobile ? '16px 0 32px' : '32px 48px 64px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 16, maxWidth: 700 }}>
@@ -722,9 +822,9 @@ function SectionHeading({ children }) {
   return (
     <h2 style={{
       fontFamily: 'Imprima, sans-serif', fontWeight: 400,
-      fontSize: 'clamp(1.05rem, 1.8vw, 1.35rem)', color: '#fff',
+      fontSize: 'clamp(0.92rem, 1.4vw, 1.12rem)', color: '#fff',
       textShadow: '0 0 16px rgba(255,255,255,0.32)',
-      marginBottom: 18, marginTop: 0, letterSpacing: '0.02em',
+      marginBottom: 14, marginTop: 0, letterSpacing: '0.02em',
     }}>
       {children}
     </h2>
