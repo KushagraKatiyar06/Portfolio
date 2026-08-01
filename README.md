@@ -1,4 +1,4 @@
-# Kushagra Katiyar | Portfolio.v2
+# Kushagra Katiyar | Portfolio
 
 A personal portfolio website built inside an interactive 3D garage — featuring my dream cars, a cinematic camera system that pans between sections, and a fully animated sidebar with my work history, projects, and skills. The environment is a nod to Need for Speed 2015.
 
