@@ -271,7 +271,7 @@ export const projects = {
   live: [
     {
       name: 'Drift Zero',
-      subtitle: 'Optimal Satelite Path + Adversery Analysis',
+      subtitle: 'Satelite Collisions + Adverserial Satelite Analysis',
       badge: 'Hackathon Winner',
       image: a('/assets/projects/driftzerocover.png'),
       live: 'https://drift-zero-blond.vercel.app/',
@@ -397,7 +397,7 @@ export const projects = {
   technical: [
     {
       name: 'Drift Zero',
-      subtitle: 'Optimal Satelite Path + Adversery Analysis',
+      subtitle: 'Satelite Collisions + Adverserial Satelite Analysis',
       badge: 'Hackathon Winner',
       image: a('/assets/projects/driftzerocover.png'),
       live: 'https://drift-zero-blond.vercel.app/',
@@ -540,7 +540,7 @@ export const projects = {
     },
     {
       name: 'Drift Zero',
-      subtitle: 'Optimal Satelite Path + Adversery Analysis',
+      subtitle: 'Satelite Collisions + Adverserial Satelite Analysis',
       badge: 'Hackathon Winner',
       image: a('/assets/projects/driftzerocover.png'),
       live: 'https://drift-zero-blond.vercel.app/',
