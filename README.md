@@ -18,7 +18,7 @@ Check it out: [kushagrakatiyar06.github.io/Portfolio-v1](https://kushagrakatiyar
 ## Setup
 
 ```bash
-git clone https://github.com/KushagraKatiyar06/Portfolio-v2.git
+git clone https://github.com/KushagraKatiyar06/Portfolio.git
 cd Portfolio-v2
 npm install
 npm run dev

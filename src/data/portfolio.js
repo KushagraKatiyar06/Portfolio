@@ -270,6 +270,19 @@ export const experiences = [
 export const projects = {
   live: [
     {
+      name: 'Drift Zero',
+      subtitle: 'Optimal Satelite Path + Adversery Analysis',
+      badge: 'Hackathon Winner',
+      image: a('/assets/projects/driftzerocover.png'),
+      live: 'https://drift-zero-blond.vercel.app/',
+      github: 'https://github.com/eshadesigns/Drift-Zero',
+      video: 'https://youtu.be/QrSg8taswJk',
+      stack: [
+        { label: 'React',      icon: a('/assets/react.svg') },
+        { label: 'TypeScript', icon: a('/assets/typescript.svg') },
+      ],
+    },
+    {
       name: 'Riva',
       subtitle: 'Agentic AI Browser & GTM Tool',
       image: a('/assets/projects/riva.png'),
@@ -338,6 +351,20 @@ export const projects = {
       ],
     },
     {
+      name: 'UseProtechtion',
+      subtitle: 'Agentic AI Malware Tracking System',
+      badge: 'Hackathon Winner',
+      image: a('/assets/projects/useprotechtion.png'),
+      live: 'https://useprotechtion.vercel.app/',
+      github: 'https://github.com/KushagraKatiyar06/useprotech.tion',
+      video: 'https://www.youtube.com/watch?v=DujEn2ixbS0&t=6s',
+      stack: [
+        { label: 'Python',  icon: a('/assets/python.svg') },
+        { label: 'Next.js', icon: a('/assets/nextjs.svg') },
+        { label: 'Docker',  icon: a('/assets/docker.svg') },
+      ],
+    },
+    {
       name: 'Technical Portfolio',
       subtitle: 'Blender Enviroment + Technical Portfolio',
       image: a('/assets/projects/portfoliocover.png'),
@@ -368,6 +395,19 @@ export const projects = {
     },
   ],
   technical: [
+    {
+      name: 'Drift Zero',
+      subtitle: 'Optimal Satelite Path + Adversery Analysis',
+      badge: 'Hackathon Winner',
+      image: a('/assets/projects/driftzerocover.png'),
+      live: 'https://drift-zero-blond.vercel.app/',
+      github: 'https://github.com/eshadesigns/Drift-Zero',
+      video: 'https://youtu.be/QrSg8taswJk',
+      stack: [
+        { label: 'React',      icon: a('/assets/react.svg') },
+        { label: 'TypeScript', icon: a('/assets/typescript.svg') },
+      ],
+    },
     {
       name: 'Riva',
       subtitle: 'Agentic AI Browser & GTM Tool',
@@ -412,6 +452,7 @@ export const projects = {
       subtitle: 'Agentic AI Malware Tracking System',
       badge: 'Hackathon Winner',
       image: a('/assets/projects/useprotechtion.png'),
+      live: 'https://useprotechtion.vercel.app/',
       github: 'https://github.com/KushagraKatiyar06/useprotech.tion',
       video: 'https://www.youtube.com/watch?v=DujEn2ixbS0&t=6s',
       stack: [
@@ -502,6 +543,7 @@ export const projects = {
       subtitle: 'Optimal Satelite Path + Adversery Analysis',
       badge: 'Hackathon Winner',
       image: a('/assets/projects/driftzerocover.png'),
+      live: 'https://drift-zero-blond.vercel.app/',
       github: 'https://github.com/eshadesigns/Drift-Zero',
       video: 'https://youtu.be/QrSg8taswJk',
       stack: [
