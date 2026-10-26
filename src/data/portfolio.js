@@ -407,7 +407,7 @@ export const projects = {
       subtitle: 'Agentic AI Malware Tracking System',
       badge: 'Hackathon Winner',
       image: a('/assets/projects/useprotechtion.png'),
-      live: 'https://useprotechtion.vercel.app/',
+      live: 'https://useprotechtion-production.up.railway.app/',
       github: 'https://github.com/KushagraKatiyar06/useprotech.tion',
       video: 'https://www.youtube.com/watch?v=DujEn2ixbS0&t=6s',
       stack: [
@@ -519,7 +519,7 @@ export const projects = {
       subtitle: 'Agentic AI Malware Tracking System',
       badge: 'Hackathon Winner',
       image: a('/assets/projects/useprotechtion.png'),
-      live: 'https://useprotechtion.vercel.app/',
+      live: 'https://useprotechtion-production.up.railway.app/',
       github: 'https://github.com/KushagraKatiyar06/useprotech.tion',
       video: 'https://www.youtube.com/watch?v=DujEn2ixbS0&t=6s',
       stack: [
