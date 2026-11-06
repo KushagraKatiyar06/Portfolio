@@ -1,0 +1,19 @@
+def findNumOfUniqueWins():
+    Kushi = ["GUD", "SASE", "HACKUSF", "SCI", "CITYCAMP", "SHELLHACKS", "KNIGHTHACKS", "SWAMPHACKSFALL"]
+    Nikhil = ["SWAMPHACKSSPRING", "HCAKLYTICS", "SASE", "SCI", "SHELLHACKS", "KNIGHTHACKS"]
+    Abhay = ["SASE", "HACKUSF", "SCI", "CITYCAMP", "SHELLHACKS", "KNIGHTHACKS", "SWAMPHACKSFALL"]
+    Taher = ["SCI", "CITYCAMP", "SHELLHACKS", "KNIGHTHACKS", "SWAMPHACKSFALL"]
+
+    People = [Kushi, Nikhil, Abhay]
+    seen = set()
+    for person in People:
+        for event in person:
+            if event in seen:
+                continue
+
+            seen.add(event)
+
+    print(seen)
+    print(len(seen))
+
+findNumOfUniqueWins()
